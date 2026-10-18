@@ -1,0 +1,1179 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="RAMATECH AI">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0a1020">
+<link rel="manifest" href="/manifest.json">
+<link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+<title>RAMATECH HOME AI</title>
+
+<style>
+:root {
+  --bg: #0a1020;
+  --surface: #111a2e;
+  --surface-2: #17223d;
+  --line: #223052;
+  --text: #e8eefc;
+  --muted: #93a1c0;
+  --accent: #38bdf8;
+  --accent-ink: #04202f;
+  --ok: #34d399;
+  --warn: #fbbf24;
+  --bad: #f87171;
+  --amber: #fbbf24;
+  --radius: 16px;
+  --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans", "Noto Sans Arabic", Tahoma, Arial, sans-serif;
+}
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background:
+    radial-gradient(1200px 500px at 50% -200px, #14274d 0%, transparent 70%),
+    var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  line-height: 1.5;
+  min-height: 100vh;
+}
+.app {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: max(16px, env(safe-area-inset-top)) 16px max(28px, env(safe-area-inset-bottom));
+}
+
+/* ---------- header ---------- */
+.top { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.brand { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.logo {
+  width: 44px; height: 44px; flex: none; border-radius: 12px;
+  display: grid; place-items: center;
+  background: linear-gradient(145deg, #1d3b6e, #0e1d3a);
+  border: 1px solid var(--line);
+  color: var(--accent);
+}
+.brand h1 { font-size: 18px; letter-spacing: .08em; margin: 0; font-weight: 700; }
+.brand p { margin: 0; color: var(--muted); font-size: 13px; }
+
+.seg {
+  display: inline-flex; padding: 3px; gap: 2px; direction: ltr;
+  background: var(--surface); border: 1px solid var(--line); border-radius: 12px;
+}
+.seg button {
+  all: unset; cursor: pointer; padding: 7px 12px; border-radius: 9px;
+  font-size: 13px; font-weight: 600; color: var(--muted); min-width: 52px; text-align: center;
+}
+.seg button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); }
+.seg button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.pills { display: flex; gap: 8px; flex-wrap: wrap; margin: 14px 0 4px; }
+.pill {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 6px 12px; border-radius: 999px; font-size: 12.5px; color: var(--muted);
+  background: var(--surface); border: 1px solid var(--line);
+}
+.dot { width: 8px; height: 8px; border-radius: 50%; background: #64748b; flex: none; }
+.pill[data-s="ok"] .dot { background: var(--ok); box-shadow: 0 0 8px var(--ok); }
+.pill[data-s="warn"] .dot { background: var(--warn); }
+.pill[data-s="bad"] .dot { background: var(--bad); }
+.pill[data-s="ok"] { color: var(--text); }
+
+/* ---------- cards ---------- */
+.card {
+  background: linear-gradient(180deg, var(--surface), #0e1730);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 18px;
+  margin: 14px 0;
+}
+.card h2 {
+  margin: 0 0 12px; font-size: 12.5px; font-weight: 700;
+  letter-spacing: .1em; text-transform: uppercase; color: var(--muted);
+}
+.row { display: flex; gap: 10px; align-items: stretch; }
+.row > * { min-width: 0; }
+
+.btn {
+  appearance: none; border: 1px solid var(--line); background: var(--surface-2); color: var(--text);
+  border-radius: 12px; padding: 12px 16px; font: inherit; font-weight: 600; font-size: 14.5px;
+  cursor: pointer; min-height: 46px;
+}
+.btn:active { transform: scale(.98); }
+.btn:focus-visible, .tile:focus-visible, .mic:focus-visible, .chip:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.btn.danger { border-color: #5b2a33; color: #fecaca; }
+.btn.grow { flex: 1; }
+
+input[type=text], input[type=password], select {
+  width: 100%; min-height: 46px; padding: 10px 14px; font: inherit; font-size: 16px;
+  color: var(--text); background: #0b1328; border: 1px solid var(--line); border-radius: 12px;
+}
+input:focus, select:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+select option { color: #0f172a; background: #fff; }
+label.field { display: block; font-size: 13px; color: var(--muted); margin: 14px 0 6px; }
+.hint { font-size: 12.5px; color: var(--muted); margin: 8px 0 0; }
+.hint.warn { color: var(--warn); }
+
+/* ---------- voice ---------- */
+.voice-hero { display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 6px 0 4px; }
+.mic {
+  position: relative; width: 92px; height: 92px; border-radius: 50%; border: 0; cursor: pointer;
+  background: linear-gradient(145deg, #3cc3ff, #1b86c9); color: var(--accent-ink);
+  display: grid; place-items: center;
+  box-shadow: 0 10px 30px rgba(56, 189, 248, .25);
+}
+.mic svg { width: 38px; height: 38px; }
+.mic::after {
+  content: ""; position: absolute; inset: -8px; border-radius: 50%;
+  border: 2px solid var(--accent); opacity: 0; pointer-events: none;
+}
+.mic.listening { background: linear-gradient(145deg, #fb7185, #e11d48); color: #fff; box-shadow: 0 10px 30px rgba(244, 63, 94, .35); }
+.mic.listening::after { border-color: #fb7185; animation: ring 1.4s ease-out infinite; }
+.mic.busy { filter: saturate(.6); }
+@keyframes ring { 0% { transform: scale(.9); opacity: .9; } 100% { transform: scale(1.35); opacity: 0; } }
+.vstatus { min-height: 22px; font-size: 14.5px; color: var(--accent); font-weight: 600; text-align: center; }
+.vstatus[data-s="err"] { color: var(--bad); }
+
+.chips { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 4px; }
+.chip {
+  all: unset; cursor: pointer; padding: 7px 12px; border-radius: 999px; font-size: 13px;
+  color: var(--muted); border: 1px solid var(--line); background: #0b1328;
+}
+.chip:hover { color: var(--text); border-color: var(--accent); }
+
+.log { display: flex; flex-direction: column; gap: 8px; margin: 14px 0 12px; max-height: 280px; overflow-y: auto; }
+.log:empty::before { content: attr(data-empty); color: var(--muted); font-size: 13px; text-align: center; padding: 12px 0; }
+.msg { max-width: 88%; padding: 9px 13px; border-radius: 14px; font-size: 14.5px; overflow-wrap: anywhere; }
+.msg.user { align-self: flex-end; background: #14315c; border: 1px solid #1f4a86; border-end-end-radius: 4px; }
+.msg.bot { align-self: flex-start; background: var(--surface-2); border: 1px solid var(--line); border-end-start-radius: 4px; }
+.msg small { display: block; font-size: 11px; color: var(--muted); margin-bottom: 2px; letter-spacing: .04em; }
+
+/* ---------- appliances ---------- */
+.tiles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.tile {
+  all: unset; box-sizing: border-box; cursor: pointer; position: relative;
+  display: flex; flex-direction: column; gap: 14px; padding: 16px; border-radius: 14px;
+  background: #0b1328; border: 1px solid var(--line);
+  transition: border-color .2s, background .2s, box-shadow .2s;
+}
+.tile:active { transform: scale(.985); }
+.tile .ic { width: 34px; height: 34px; color: var(--muted); transition: color .2s; }
+.tile .nm { font-weight: 650; font-size: 15px; }
+.tile .st { font-size: 12.5px; color: var(--muted); }
+.tile .sw {
+  position: absolute; top: 16px; inset-inline-end: 16px; width: 38px; height: 22px; border-radius: 999px;
+  background: #26324f; transition: background .2s;
+}
+.tile .sw::after {
+  content: ""; position: absolute; top: 3px; inset-inline-start: 3px; width: 16px; height: 16px; border-radius: 50%;
+  background: #cbd5e1; transition: transform .2s;
+}
+.tile[aria-checked="true"] { border-color: #1f6f5a; background: linear-gradient(180deg, #0d2230, #0b1328); }
+.tile[aria-checked="true"] .ic { color: var(--ok); }
+.tile[aria-checked="true"] .st { color: var(--ok); }
+.tile[aria-checked="true"] .sw { background: var(--ok); }
+.tile[aria-checked="true"] .sw::after { transform: translateX(16px); background: #04251b; }
+[dir="rtl"] .tile[aria-checked="true"] .sw::after { transform: translateX(-16px); }
+.tile[data-dev="light"][aria-checked="true"] { box-shadow: 0 0 24px rgba(251, 191, 36, .12); border-color: #7a5d12; }
+.tile[data-dev="light"][aria-checked="true"] .ic { color: var(--amber); }
+.tile[data-dev="fan"][aria-checked="true"] .ic svg { animation: spin 1.1s linear infinite; transform-origin: 50% 50%; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.all-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+
+/* ---------- settings ---------- */
+details.card summary {
+  list-style: none; cursor: pointer; font-size: 12.5px; font-weight: 700;
+  letter-spacing: .1em; text-transform: uppercase; color: var(--muted);
+  display: flex; justify-content: space-between; align-items: center;
+}
+details.card summary::-webkit-details-marker { display: none; }
+details.card summary::after { content: "▾"; font-size: 14px; transition: transform .2s; }
+details.card[open] summary::after { transform: rotate(180deg); }
+details.card[open] summary { margin-bottom: 4px; }
+.two { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.two:has(#accentWrap[hidden]) { grid-template-columns: 1fr; }
+.range-head { display: flex; justify-content: space-between; align-items: baseline; margin: 16px 0 4px; font-size: 13px; color: var(--muted); }
+.range-head b { color: var(--accent); font-variant-numeric: tabular-nums; }
+input[type=range] { width: 100%; accent-color: var(--accent); }
+.presets { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 8px; }
+.check { display: flex; gap: 10px; align-items: center; margin-top: 16px; font-size: 14px; }
+.check input { width: 18px; height: 18px; accent-color: var(--accent); }
+
+/* ---------- footer ---------- */
+.foot { text-align: center; color: var(--muted); font-size: 12.5px; margin-top: 22px; }
+.foot strong { color: var(--text); }
+.apk a { color: var(--accent); font-weight: 600; text-decoration: none; }
+[hidden] { display: none !important; }
+
+@media (min-width: 720px) {
+  .tiles { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+</style>
+</head>
+
+<body>
+<div class="app">
+
+  <!-- ================= HEADER ================= -->
+  <header class="top">
+    <div class="brand">
+      <div class="logo" aria-hidden="true">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10v9.5h13V10"/><path d="M9.5 14.5c1.5-1.4 3.5-1.4 5 0M11 17c.6-.5 1.4-.5 2 0"/></svg>
+      </div>
+      <div>
+        <h1>RAMATECH HOME AI</h1>
+        <p data-i18n="tagline">Smart home voice assistant</p>
+      </div>
+    </div>
+    <div class="seg" role="group" aria-label="Language">
+      <button type="button" data-lang="en" aria-pressed="true">EN</button>
+      <button type="button" data-lang="ar" aria-pressed="false">عربي</button>
+      <button type="button" data-lang="yo" aria-pressed="false">Yorùbá</button>
+    </div>
+  </header>
+
+  <div class="pills">
+    <div class="pill" id="pillCloud" data-s="off"><span class="dot"></span><span id="pillCloudText">—</span></div>
+    <div class="pill" id="pillDevice" data-s="off"><span class="dot"></span><span id="pillDeviceText">—</span></div>
+  </div>
+
+  <!-- ================= CLOUD CONNECT ================= -->
+  <section class="card" id="connectCard">
+    <h2 data-i18n="remote">Remote connection</h2>
+    <form class="row" id="connectForm" autocomplete="off">
+      <input type="password" id="codeInput" inputmode="numeric" data-i18n-ph="accessCode" placeholder="Access code" aria-label="Access code">
+      <button class="btn primary" type="submit" data-i18n="connect">Connect</button>
+    </form>
+  </section>
+
+  <!-- ================= VOICE ================= -->
+  <section class="card">
+    <h2 data-i18n="voiceTitle">Voice assistant</h2>
+    <div class="voice-hero">
+      <button class="mic" id="micBtn" type="button" aria-label="Speak">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>
+      </button>
+      <div class="vstatus" id="voiceStatus" role="status" aria-live="polite"></div>
+      <div class="chips" id="chips"></div>
+    </div>
+
+    <div class="log" id="log" data-empty="" aria-live="polite"></div>
+
+    <form class="row" id="typeForm" autocomplete="off">
+      <input type="text" id="typeInput" data-i18n-ph="typePh" placeholder="Type a command…" enterkeyhint="send">
+      <button class="btn primary" type="submit" data-i18n="send">Send</button>
+    </form>
+    <p class="hint" id="browserHint"></p>
+  </section>
+
+  <!-- ================= APPLIANCES ================= -->
+  <section class="card">
+    <h2 data-i18n="devicesTitle">Appliances</h2>
+    <div class="tiles" id="tiles"></div>
+    <div class="all-row">
+      <button class="btn primary" type="button" id="allOn" data-i18n="allOn">All on</button>
+      <button class="btn danger" type="button" id="allOff" data-i18n="allOff">All off</button>
+    </div>
+  </section>
+
+  <!-- ================= VOICE SETTINGS ================= -->
+  <details class="card" id="settings">
+    <summary data-i18n="settingsTitle">Voice &amp; speech settings</summary>
+
+    <div class="two">
+      <div>
+        <label class="field" for="genderSel" data-i18n="gender">Voice</label>
+        <select id="genderSel"></select>
+      </div>
+      <div id="accentWrap">
+        <label class="field" for="accentSel" data-i18n="accent">Accent</label>
+        <select id="accentSel"></select>
+      </div>
+    </div>
+
+    <label class="field" for="voiceSel" data-i18n="voiceSel">Voice on this device</label>
+    <select id="voiceSel"></select>
+    <p class="hint warn" id="noVoice" hidden></p>
+
+    <div class="range-head"><span data-i18n="speed">Speaking speed</span><b id="rateVal">0.85×</b></div>
+    <input type="range" id="rate" min="0.5" max="1.2" step="0.05">
+    <div class="presets">
+      <button class="btn" type="button" data-rate="0.7" data-i18n="slow">Slow</button>
+      <button class="btn" type="button" data-rate="0.85" data-i18n="normal">Normal</button>
+      <button class="btn" type="button" data-rate="1" data-i18n="fast">Fast</button>
+    </div>
+
+    <div class="range-head"><span data-i18n="pitch">Pitch</span><b id="pitchVal">1.00</b></div>
+    <input type="range" id="pitch" min="0.6" max="1.5" step="0.05">
+
+    <label class="check"><input type="checkbox" id="tapSpeak"><span data-i18n="tapSpeak">Speak a confirmation when I use the buttons</span></label>
+
+    <div class="row" style="margin-top:16px">
+      <button class="btn primary grow" type="button" id="testBtn" data-i18n="test">Test voice</button>
+      <button class="btn grow" type="button" id="welcomeBtn" data-i18n="welcomeBtn">Welcome message</button>
+      <button class="btn" type="button" id="resetBtn" data-i18n="reset">Reset</button>
+    </div>
+    <p class="hint" data-i18n="voiceNote">Available voices depend on your phone or browser. Gender labels are guessed from voice names.</p>
+  </details>
+
+  <!-- ================= SYSTEM ================= -->
+  <section class="card apk" id="apkCard">
+    <h2 data-i18n="appTitle">Android app</h2>
+    <p class="hint" style="margin-top:0" data-i18n="appText">Download the RAMATECH HOME AI Android app.</p>
+    <p style="margin:10px 0 0"><a href="/downloads/ramatech-home-ai.apk" download="ramatech-home-ai.apk" data-i18n="download">Download APK</a></p>
+  </section>
+
+  <footer class="foot">
+    <span data-i18n="credit">Designed, programmed and developed by</span> <strong>Ramatechcode Lab</strong>
+  </footer>
+</div>
+
+<noscript><p style="text-align:center;color:#fff">JavaScript is required.</p></noscript>
+
+<script>
+"use strict";
+
+/* =====================================================================
+   MODE — "cloud" on Render, "local" when served by the ESP32.
+   (tools/build_esp32_page.py rewrites the next line for the ESP32 copy.)
+   ===================================================================== */
+const MODE = "cloud"; /*MODE_MARK*/
+const IS_LOCAL = MODE === "local";
+const DEVICE_ID = "RAMATECH_HOME_01";
+
+/*PURE_START*/
+/* =====================================================================
+   LANGUAGE-INDEPENDENT COMMAND ENGINE
+   Every language's keywords are checked, whichever language the screen
+   is in, so an English command still works in Arabic mode and so on.
+   ===================================================================== */
+function norm(s) {
+  return String(s == null ? "" : s)
+    .toLowerCase()
+    .normalize("NFKD")
+    .replace(/[̀-ͯ]/g, "")            // Latin + Yoruba tone marks / under-dots
+    .replace(/[ً-ٰٟـ]/g, "") // Arabic diacritics + tatweel
+    .replace(/[أإآٱ]/g, "ا").replace(/ى/g, "ي").replace(/ة/g, "ه")
+    .replace(/ؤ/g, "و").replace(/ئ/g, "ي")
+    .replace(/['’`]/g, "")
+    .replace(/[.,!?;:،؛؟"()\[\]{}\-_/\\]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+const ARABIC = /[؀-ۿ]/;
+function esc(s) { return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); }
+function compile(list) {
+  const subs = [], res = [];
+  list.forEach(p0 => {
+    const p = norm(p0);
+    if (!p) return;
+    if (ARABIC.test(p)) {
+      if (p.length > 3) subs.push(p);                            // Arabic: substring (prefixes attach to words)
+      else res.push("(?:^| )(?:[وبلفك])?(?:ال)?" + esc(p) + "(?:ها|هم|ه|ك|ي|ن|ون)?(?: |$)"); // short Arabic: word + common prefix/suffix
+    } else res.push("(?:^| )" + esc(p) + "(?: |$)");             // Latin / Yoruba: whole words
+  });
+  const re = res.length ? new RegExp(res.join("|")) : null;
+  return t => (re && re.test(t)) || subs.some(s => t.includes(s));
+}
+
+const LEX = {
+  wake: ["hey alexa", "okay alexa", "ok alexa", "alexa", "يا اليكسا", "اليكسا", "الكسا", "اليكسه"],
+  on:  ["on", "open", "start", "activate", "enable",
+        "شغل", "شغلي", "تشغيل", "اشعل", "افتح", "فتح", "اضيء", "ضيء", "وصل", "فعل",
+        "tan", "tana", "tanna"],
+  off: ["off", "close", "stop", "deactivate", "disable", "kill",
+        "اطفي", "اطفا", "طفي", "اغلق", "اقفل", "ايقاف", "اوقف", "وقف", "فصل", "اطفاء", "قفل", "سكر",
+        "pa", "paa"],
+  all: ["all", "everything", "every device", "كل", "جميع", "الكل", "كافه", "كلها", "gbogbo"],
+  rope:  ["rope light", "rope lights", "rope", "ropelight", "strip light", "led strip",
+          "حبل", "شريط الاضاءه", "شريط", "ina okun", "okun"],
+  light: ["light", "lights", "lamp", "bulb",
+          "ضوء", "نور", "الانوار", "اضاءه", "لمبه", "مصباح", "ina", "imole"],
+  fan:   ["fan", "fans", "مروحه", "مراوح", "faanu", "fanu", "afefe"],
+  tv:    ["tv", "t v", "television", "telly",
+          "تلفزيون", "تلفاز", "شاشه", "تي في", "telifisonu", "telifison", "tele"],
+  time:  ["what time", "current time", "the time", "time now", "tell me the time", "date and time", "time and date",
+          "كم الساعه", "الساعه", "الوقت", "aago", "wakati"],
+  date:  ["date", "todays date", "what day", "what is today", "whats today",
+          "التاريخ", "تاريخ", "ما اليوم", "اي يوم", "ojo oni", "ojo wo", "ojo"],
+  status: ["status", "home status", "how is the house", "what is on", "whats on", "what is off", "whats off",
+           "الحاله", "حاله المنزل", "وضع", "ما الذي يعمل", "ماذا يعمل", "ما المشغل",
+           "ipo", "ipo ile", "bawo ni ile", "kini ti tan"],
+  howAreYou: ["how are you", "how are u", "how r you", "how r u", "how do you do",
+              "كيف حالك", "كيفك", "كيف الحال", "شلونك", "اخبارك",
+              "se alafia ni", "se daadaa ni", "bawo ni o wa", "bawo ni o se wa", "bawo ni"],
+  name:  ["what is your name", "whats your name", "your name",
+          "ما اسمك", "ما هو اسمك", "شو اسمك", "اسمك", "oruko re", "oruko yin", "kini oruko"],
+  whoAreYou: ["who are you", "introduce yourself", "tell me about yourself",
+              "من انت", "من انتي", "عرفي بنفسك", "عرف بنفسك",
+              "tani e", "tani iwo", "so nipa ara re"],
+  whoMade: ["who developed you", "who made you", "who programmed you", "who created you", "who designed you", "who built you",
+            "من صنعك", "من صممك", "من طورك", "من برمجك", "من انشاك", "من ابتكرك", "من صنعتك", "من برمجتك",
+            "tani o ko e", "tani o se e", "tani o ko o", "tani ko o", "tani se e", "tani o da e"],
+  appliances: ["what can you control", "what can you power", "what appliances", "which appliances", "what devices",
+               "ماذا تستطيعين", "ماذا تستطيع", "ما الاجهزه", "ما هي الاجهزه", "ماذا تتحكمين",
+               "kini o le sakoso", "ohun elo wo", "awon ohun elo wo"],
+  thanks: ["thank you", "thanks", "thank u", "شكرا", "جزاك الله", "e se", "o se", "ese", "e seun", "o seun", "mo dupe", "e dupe", "adupe"],
+  hello: ["hello", "hi", "hey", "good morning", "good afternoon", "good evening",
+          "مرحبا", "اهلا", "السلام عليكم", "صباح الخير", "مساء الخير",
+          "pele", "e kaaro", "e kaasan", "e kaale", "mo ki yin", "bawo"]
+};
+const M = {};
+Object.keys(LEX).forEach(k => { M[k] = compile(LEX[k]); });
+const WAKE_RE = new RegExp(LEX.wake.map(w => esc(norm(w))).sort((a, b) => b.length - a.length).join("|"), "g");
+
+function stripWake(t) {
+  return t.replace(WAKE_RE, " ").replace(/\s+/g, " ").trim();
+}
+
+/* -> {intent, device?, state?}
+   intents: empty | date | time | both | status | whoMade | howAreYou | whoAreYou | name |
+            appliances | thanks | all | device | hello | unknown */
+function parse(raw) {
+  const t = stripWake(norm(raw));
+  if (!t) return { intent: "empty" };
+
+  const isTime = M.time(t) || t === "time";
+  const isDate = M.date(t);
+  if (isTime && isDate) return { intent: "both" };
+  if (isDate) return { intent: "date" };
+  if (isTime) return { intent: "time" };
+
+  if (M.status(t)) return { intent: "status" };
+
+  if (M.whoMade(t) || /(^| )tani( |.* )(ko|se|da)( |$)/.test(t)) return { intent: "whoMade" };
+  if (M.howAreYou(t)) return { intent: "howAreYou" };
+  if (M.whoAreYou(t)) return { intent: "whoAreYou" };
+  if (M.name(t)) return { intent: "name" };
+  if (M.appliances(t)) return { intent: "appliances" };
+  if (M.thanks(t)) return { intent: "thanks" };
+
+  const wantsOff = M.off(t), wantsOn = M.on(t);
+  if (wantsOn || wantsOff) {
+    const state = wantsOff ? "off" : "on";          // "off" wins if both are present
+    const device = M.rope(t) ? "rope" : M.light(t) ? "light" : M.fan(t) ? "fan" : M.tv(t) ? "tv" : "";
+    if (device) return { intent: "device", device, state };
+    if (M.all(t)) return { intent: "all", state };
+  }
+  if (M.hello(t)) return { intent: "hello" };
+  return { intent: "unknown" };
+}
+/*PURE_END*/
+
+/* =====================================================================
+   TEXT: SCREEN + SPOKEN REPLIES  (EN / AR / YO)
+   ===================================================================== */
+const LANGS = {
+  en: { dir: "ltr", stt: "en-US", tts: ["en"], name: "English" },
+  ar: { dir: "rtl", stt: "ar-SA", tts: ["ar"], name: "Arabic" },
+  yo: { dir: "ltr", stt: "yo-NG", tts: ["yo"], name: "Yoruba" }
+};
+const DEV_KEYS = ["light", "rope", "fan", "tv"];
+
+const UI = {
+  en: {
+    tagline: "Smart home voice assistant",
+    remote: "Remote connection", accessCode: "Access code", connect: "Connect",
+    cloudOff: "Not connected", cloudConnecting: "Connecting…", cloudOn: "Cloud connected",
+    cloudBad: "Wrong access code", cloudLost: "Connection lost — retrying",
+    devOnline: "Controller online", devOffline: "Controller offline",
+    localOn: "Local controller online", localOff: "Cannot reach controller",
+    voiceTitle: "Voice assistant", micLabel: "Speak",
+    ready: "Tap the microphone and speak", listening: "Listening… speak now", processing: "Processing…", speaking: "Speaking…",
+    typePh: "Type a command…", send: "Send", empty: "Your conversation will appear here.",
+    you: "You", bot: "Alexa",
+    devicesTitle: "Appliances", light: "Light", rope: "Rope light", fan: "Fan", tv: "Television",
+    on: "On", off: "Off", unknown: "—", allOn: "All on", allOff: "All off",
+    settingsTitle: "Voice & speech settings", gender: "Voice", accent: "Accent", voiceSel: "Voice on this device",
+    any: "Any", female: "Female", male: "Male", auto: "Automatic",
+    speed: "Speaking speed", pitch: "Pitch", slow: "Slow", normal: "Normal", fast: "Fast",
+    tapSpeak: "Speak a confirmation when I use the buttons",
+    test: "Test voice", welcomeBtn: "Welcome message", reset: "Reset",
+    voiceNote: "Available voices depend on your phone or browser. Gender labels are guessed from voice names.",
+    noVoice: "No English voice was found on this device. The reply will use the closest available voice, so pronunciation may be approximate. The text always shows on screen.",
+    appTitle: "Android app", appText: "Download the RAMATECH HOME AI Android app.", download: "Download APK",
+    credit: "Designed, programmed and developed by",
+    errDenied: "Microphone permission is blocked. Allow microphone access for this site in your browser settings.",
+    errService: "Speech recognition is not available in this browser or app.",
+    errNoSpeech: "I did not hear anything. Tap the microphone and try again.",
+    errAudio: "I cannot access the microphone.",
+    errNetwork: "Speech recognition needs an internet connection.",
+    errLang: "This browser cannot recognise this language by voice. Type the command instead.",
+    unsupported: "Voice recognition is not supported in this browser. You can type commands instead.",
+    chips: ["Turn on the fan", "Switch off the light", "Rope light on", "All off", "What time is it?", "Home status"]
+  },
+  ar: {
+    tagline: "مساعد صوتي للمنزل الذكي",
+    remote: "الاتصال عن بُعد", accessCode: "رمز الدخول", connect: "اتصال",
+    cloudOff: "غير متصل", cloudConnecting: "جارٍ الاتصال…", cloudOn: "متصل بالسحابة",
+    cloudBad: "رمز الدخول غير صحيح", cloudLost: "انقطع الاتصال — جارٍ إعادة المحاولة",
+    devOnline: "وحدة التحكم متصلة", devOffline: "وحدة التحكم غير متصلة",
+    localOn: "وحدة التحكم المحلية متصلة", localOff: "تعذّر الوصول إلى وحدة التحكم",
+    voiceTitle: "المساعد الصوتي", micLabel: "تحدث",
+    ready: "اضغط على الميكروفون وتحدث", listening: "أستمع… تحدث الآن", processing: "جارٍ المعالجة…", speaking: "أتحدث…",
+    typePh: "اكتب أمراً…", send: "إرسال", empty: "ستظهر المحادثة هنا.",
+    you: "أنت", bot: "أليكسا",
+    devicesTitle: "الأجهزة", light: "الضوء", rope: "شريط الإضاءة", fan: "المروحة", tv: "التلفزيون",
+    on: "يعمل", off: "متوقف", unknown: "—", allOn: "تشغيل الكل", allOff: "إيقاف الكل",
+    settingsTitle: "إعدادات الصوت والنطق", gender: "الصوت", accent: "اللهجة", voiceSel: "الصوت على هذا الجهاز",
+    any: "أي", female: "أنثى", male: "ذكر", auto: "تلقائي",
+    speed: "سرعة الكلام", pitch: "درجة الصوت", slow: "بطيء", normal: "عادي", fast: "سريع",
+    tapSpeak: "انطق تأكيداً عند استخدام الأزرار",
+    test: "تجربة الصوت", welcomeBtn: "رسالة الترحيب", reset: "إعادة ضبط",
+    voiceNote: "الأصوات المتاحة تعتمد على هاتفك أو متصفحك. يتم تخمين النوع من اسم الصوت.",
+    noVoice: "لم يتم العثور على صوت عربي في هذا الجهاز. سيُستخدم أقرب صوت متاح وقد يكون النطق تقريبياً. النص يظهر دائماً على الشاشة.",
+    appTitle: "تطبيق أندرويد", appText: "حمّل تطبيق RAMATECH HOME AI لأندرويد.", download: "تحميل APK",
+    credit: "تصميم وبرمجة وتطوير",
+    errDenied: "إذن الميكروفون محظور. اسمح بالوصول إلى الميكروفون لهذا الموقع من إعدادات المتصفح.",
+    errService: "التعرف على الصوت غير متاح في هذا المتصفح أو التطبيق.",
+    errNoSpeech: "لم أسمع شيئاً. اضغط على الميكروفون وحاول مرة أخرى.",
+    errAudio: "لا أستطيع الوصول إلى الميكروفون.",
+    errNetwork: "التعرف على الصوت يحتاج إلى اتصال بالإنترنت.",
+    errLang: "هذا المتصفح لا يستطيع التعرف على هذه اللغة صوتياً. اكتب الأمر بدلاً من ذلك.",
+    unsupported: "التعرف على الصوت غير مدعوم في هذا المتصفح. يمكنك كتابة الأوامر.",
+    chips: ["شغل المروحة", "أطفئ الضوء", "شغل شريط الإضاءة", "أطفئ كل الأجهزة", "كم الساعة؟", "حالة المنزل"]
+  },
+  yo: {
+    tagline: "Olùrànlọ́wọ́ ohùn fún ilé ọlọ́gbọ́n",
+    remote: "Ìsopọ̀ látọ̀ọ́nà jíjìn", accessCode: "Kóòdù àyè", connect: "Sopọ̀",
+    cloudOff: "Kò tíì sopọ̀", cloudConnecting: "Ń sopọ̀…", cloudOn: "A ti sopọ̀ mọ́ cloud",
+    cloudBad: "Kóòdù àyè kò tọ́", cloudLost: "Ìsopọ̀ já — ń gbìyànjú padà",
+    devOnline: "Ẹ̀rọ aláṣẹ wà lórí ayélujára", devOffline: "Ẹ̀rọ aláṣẹ kò sí lórí ayélujára",
+    localOn: "Ẹ̀rọ aláṣẹ ibẹ̀ wà lórí ayélujára", localOff: "Kò lè dé ẹ̀rọ aláṣẹ",
+    voiceTitle: "Olùrànlọ́wọ́ ohùn", micLabel: "Sọ̀rọ̀",
+    ready: "Tẹ makirofóònù kí ẹ sì sọ̀rọ̀", listening: "Ń gbọ́… ẹ sọ̀rọ̀ báyìí", processing: "Ń ṣiṣẹ́ lórí rẹ̀…", speaking: "Ń sọ̀rọ̀…",
+    typePh: "Kọ àṣẹ síbí…", send: "Fi ránṣẹ́", empty: "Ọ̀rọ̀ yín yóò hàn níbí.",
+    you: "Ẹ̀yin", bot: "Alexa",
+    devicesTitle: "Àwọn ohun èlò", light: "Iná", rope: "Iná okùn", fan: "Fáànù", tv: "Tẹlifíṣọ̀n",
+    on: "Ti tan", off: "Ti pa", unknown: "—", allOn: "Tan gbogbo rẹ̀", allOff: "Pa gbogbo rẹ̀",
+    settingsTitle: "Ètò ohùn àti ìsọ̀rọ̀", gender: "Ohùn", accent: "Àhọ́n", voiceSel: "Ohùn tó wà lórí ẹ̀rọ yìí",
+    any: "Èyíkéyìí", female: "Obìnrin", male: "Ọkùnrin", auto: "Aládàáṣiṣẹ́",
+    speed: "Ìyára ìsọ̀rọ̀", pitch: "Gíga ohùn", slow: "Díẹ̀díẹ̀", normal: "Déédé", fast: "Yára",
+    tapSpeak: "Sọ ìdánilójú nígbà tí mo bá tẹ bọ́tìnì",
+    test: "Dán ohùn wò", welcomeBtn: "Ọ̀rọ̀ káàbọ̀", reset: "Tún ṣe",
+    voiceNote: "Àwọn ohùn tó wà dá lórí fóònù tàbí brówsà yín. A máa ń ṣe àfojúsùn ẹ̀yà ohùn látinú orúkọ rẹ̀.",
+    noVoice: "A kò rí ohùn Yorùbá lórí ẹ̀rọ yìí. Ohùn tó súnmọ́ jù lọ ni a ó lò, nítorí náà ìpè lè má péye. Ọ̀rọ̀ náà máa ń hàn lórí ìkànnì nígbà gbogbo.",
+    appTitle: "Áàpù Android", appText: "Ṣe ìgbàsílẹ̀ áàpù RAMATECH HOME AI fún Android.", download: "Gba APK",
+    credit: "Ṣe ìgbékalẹ̀, kọ ètò àti dá sílẹ̀ láti ọwọ́",
+    errDenied: "A ti dínà ààyè makirofóònù. Ẹ gba ààyè makirofóònù fún ojúlé yìí nínú ètò brówsà.",
+    errService: "Ìdámọ̀ ohùn kò sí nínú brówsà tàbí áàpù yìí.",
+    errNoSpeech: "Mi ò gbọ́ nǹkan kan. Ẹ tẹ makirofóònù kí ẹ tún gbìyànjú.",
+    errAudio: "Mi ò lè dé makirofóònù.",
+    errNetwork: "Ìdámọ̀ ohùn nílò ìsopọ̀ ayélujára.",
+    errLang: "Brówsà yìí kò lè dá èdè yìí mọ̀ nípasẹ̀ ohùn. Ẹ kọ àṣẹ náà dípò.",
+    unsupported: "Brówsà yìí kò ṣe àtìlẹ́yìn ìdámọ̀ ohùn. Ẹ lè kọ àṣẹ.",
+    chips: ["Tan iná", "Pa fáànù", "Tan iná okùn", "Pa gbogbo rẹ̀", "Aago mélòó ni?", "Ipò ilé"]
+  }
+};
+
+const MONTHS_YO = ["Ṣẹ́rẹ́", "Èrèlè", "Ẹrẹ̀nà", "Ìgbé", "Èbibi", "Òkùdù", "Agẹmọ", "Ògún", "Owewe", "Ọ̀wàrà", "Bélú", "Ọ̀pẹ̀"];
+const DAYS_YO = ["Ọjọ́ Àìkú", "Ọjọ́ Ajé", "Ọjọ́ Ìsẹ́gun", "Ọjọ́rú", "Ọjọ́bọ̀", "Ọjọ́ Ẹtì", "Ọjọ́ Àbámẹ́ta"];
+const MONTHS_EN3 = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+function lagosNow() {                         // Nigeria is UTC+1 all year (no daylight saving)
+  const d = new Date(Date.now() + 3600000);
+  return { wd: d.getUTCDay(), day: d.getUTCDate(), mon: d.getUTCMonth(), year: d.getUTCFullYear(), h: d.getUTCHours(), m: d.getUTCMinutes(), real: new Date() };
+}
+function timeText(lang) {
+  const n = lagosNow();
+  const mm = String(n.m).padStart(2, "0");
+  if (lang === "yo") {
+    const h12 = n.h % 12 || 12;
+    const part = n.h < 12 ? "òwúrọ̀" : n.h < 16 ? "ọ̀sán" : n.h < 20 ? "ìrọ̀lẹ́" : "alẹ́";
+    return h12 + ":" + mm + " " + part;
+  }
+  try {
+    return new Intl.DateTimeFormat(lang === "ar" ? "ar-EG-u-ca-gregory" : "en-NG",
+      { hour: "numeric", minute: "2-digit", hour12: true, timeZone: "Africa/Lagos" }).format(n.real);
+  } catch (e) { return n.h + ":" + mm; }
+}
+function dateText(lang) {
+  const n = lagosNow();
+  if (lang === "yo") return DAYS_YO[n.wd] + ", " + n.day + " " + MONTHS_YO[n.mon] + " " + n.year;
+  try {
+    return new Intl.DateTimeFormat(lang === "ar" ? "ar-EG-u-ca-gregory" : "en-NG",
+      { weekday: "long", day: "numeric", month: "long", year: "numeric", timeZone: "Africa/Lagos" }).format(n.real);
+  } catch (e) { return n.day + " " + MONTHS_EN3[n.mon] + " " + n.year; }
+}
+
+/* Spoken / written replies. s = {light,rope,fan,tv} booleans */
+const NAMES = {
+  en: { light: "light", rope: "rope light", fan: "fan", tv: "television" },
+  ar: { light: "الضوء", rope: "شريط الإضاءة", fan: "المروحة", tv: "التلفزيون" },
+  yo: { light: "iná", rope: "iná okùn", fan: "fáànù", tv: "tẹlifíṣọ̀n" }
+};
+const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
+
+const R = {
+  en: {
+    empty: () => "Yes Boss. How can I assist you?",
+    hello: () => "Hello Boss. I am ready to assist you.",
+    howAreYou: () => "I am doing fine Boss. Thank you for asking. I am ready to control your smart home for you.",
+    name: () => "My name is Alexa. I am your Ramatech Home AI smart home assistant.",
+    whoAreYou: () => "Hi Boss. My name is Alexa. I am your Ramatech Home AI smart home assistant. I was designed, programmed and developed by Ramatechcode Lab to make life very easy for you.",
+    whoMade: () => "I was designed, programmed and developed by Ramatechcode Lab.",
+    appliances: () => "Alright Boss. I can currently control four appliances: the light, the rope light, the fan, and the television.",
+    thanks: () => "You are welcome Boss. I am always ready to assist you.",
+    all: on => on ? "Alright Boss. All devices are now on." : "Alright Boss. All devices are now off.",
+    device: (d, on) => "Alright Boss. " + cap(NAMES.en[d]) + " turned " + (on ? "on" : "off") + ".",
+    status: s => "Alright Boss. " + DEV_KEYS.map(k => "The " + NAMES.en[k] + " is " + (s[k] ? "on" : "off") + ".").join(" "),
+    time: () => "The current time in Nigeria is " + timeText("en") + ".",
+    date: () => "Today is " + dateText("en") + ".",
+    both: () => "Today is " + dateText("en") + ". The current time in Nigeria is " + timeText("en") + ".",
+    unknown: () => "Sorry Boss. I heard you, but I do not understand that command yet.",
+    notHeard: () => "Sorry Boss. I could not hear the command.",
+    fail: () => "Sorry Boss. I could not complete that command.",
+    notConnected: () => "Sorry Boss. The remote cloud connection is not ready. Please connect to Ramatech Cloud first.",
+    deviceOffline: () => "Sorry Boss. Your controller is offline right now.",
+    welcome: () => "Hi Boss. My name is Alexa. I am your Ramatech Home AI smart home assistant. I was designed, programmed and developed by Ramatechcode Lab to make life very easy for you. I can currently control your light, rope light, fan and television. I am ready to assist you Boss.",
+    test: () => "Hello Boss. This is Ramatech Home AI. I am speaking clearly and at a comfortable speed."
+  },
+  ar: {
+    empty: () => "نعم سيدي. كيف يمكنني مساعدتك؟",
+    hello: () => "أهلاً سيدي. أنا جاهزة لمساعدتك.",
+    howAreYou: () => "أنا بخير سيدي، شكراً لسؤالك. أنا جاهزة للتحكم في منزلك الذكي.",
+    name: () => "اسمي أليكسا. أنا مساعدة منزلك الذكي من راماتيك هوم إيه آي.",
+    whoAreYou: () => "مرحباً سيدي. اسمي أليكسا، مساعدة منزلك الذكي. تم تصميمي وبرمجتي وتطويري بواسطة راماتيك كود لاب لأجعل حياتك أسهل.",
+    whoMade: () => "تم تصميمي وبرمجتي وتطويري بواسطة راماتيك كود لاب.",
+    appliances: () => "حاضر سيدي. أستطيع حالياً التحكم في أربعة أجهزة: الضوء، وشريط الإضاءة، والمروحة، والتلفزيون.",
+    thanks: () => "عفواً سيدي. أنا دائماً جاهزة لخدمتك.",
+    all: on => on ? "حاضر سيدي. تم تشغيل جميع الأجهزة." : "حاضر سيدي. تم إيقاف جميع الأجهزة.",
+    device: (d, on) => "حاضر سيدي. " + (on ? "تم تشغيل " : "تم إيقاف ") + NAMES.ar[d] + ".",
+    status: s => "حاضر سيدي. " + DEV_KEYS.map(k => NAMES.ar[k] + (s[k] ? " يعمل." : " متوقف.")).join(" "),
+    time: () => "الساعة الآن " + timeText("ar") + " بتوقيت نيجيريا.",
+    date: () => "اليوم هو " + dateText("ar") + ".",
+    both: () => "اليوم هو " + dateText("ar") + ". والساعة الآن " + timeText("ar") + " بتوقيت نيجيريا.",
+    unknown: () => "عذراً سيدي، سمعتك لكنني لا أفهم هذا الأمر بعد.",
+    notHeard: () => "عذراً سيدي، لم أسمع الأمر.",
+    fail: () => "عذراً سيدي، لم أتمكن من تنفيذ الأمر.",
+    notConnected: () => "عذراً سيدي، الاتصال بالسحابة غير جاهز. يرجى الاتصال أولاً.",
+    deviceOffline: () => "عذراً سيدي، وحدة التحكم غير متصلة الآن.",
+    welcome: () => "أهلاً سيدي. اسمي أليكسا، مساعدة منزلك الذكي. تم تصميمي وبرمجتي وتطويري بواسطة راماتيك كود لاب لأجعل حياتك أسهل. أستطيع حالياً التحكم في الضوء وشريط الإضاءة والمروحة والتلفزيون. أنا جاهزة لخدمتك سيدي.",
+    test: () => "مرحباً سيدي. هذا راماتيك هوم إيه آي. أتحدث بوضوح وبسرعة مريحة."
+  },
+  yo: {
+    empty: () => "Bẹ́ẹ̀ ni, Ọ̀gá. Báwo ni mo ṣe lè ràn yín lọ́wọ́?",
+    hello: () => "Báwo ni, Ọ̀gá. Mo ti ṣetán láti ràn yín lọ́wọ́.",
+    howAreYou: () => "Ara mi le, Ọ̀gá. Ẹ ṣé tí ẹ bèèrè. Mo ti ṣetán láti ṣàkóso ilé ọlọ́gbọ́n yín.",
+    name: () => "Orúkọ mi ni Alexa. Èmi ni olùrànlọ́wọ́ ilé ọlọ́gbọ́n yín láti Ramatech Home AI.",
+    whoAreYou: () => "Ẹ n lẹ́, Ọ̀gá. Orúkọ mi ni Alexa, olùrànlọ́wọ́ ilé ọlọ́gbọ́n yín. Ramatechcode Lab ló ṣe mí, ó kọ ètò mi, ó sì dá mi sílẹ̀ kí ayé yín lè rọrùn.",
+    whoMade: () => "Ramatechcode Lab ló ṣe mí, ó kọ ètò mi, ó sì dá mi sílẹ̀.",
+    appliances: () => "Ó dára, Ọ̀gá. Mo lè ṣàkóso ohun èlò mẹ́rin báyìí: iná, iná okùn, fáànù àti tẹlifíṣọ̀n.",
+    thanks: () => "Kò tó nǹkan, Ọ̀gá. Mo ṣetán nígbàgbogbo láti ràn yín lọ́wọ́.",
+    all: on => on ? "Ó dára, Ọ̀gá. A ti tan gbogbo ohun èlò." : "Ó dára, Ọ̀gá. A ti pa gbogbo ohun èlò.",
+    device: (d, on) => "Ó dára, Ọ̀gá. " + (on ? "A ti tan " : "A ti pa ") + NAMES.yo[d] + ".",
+    status: s => "Ó dára, Ọ̀gá. " + DEV_KEYS.map(k => cap(NAMES.yo[k]) + (s[k] ? " ti tan." : " ti pa.")).join(" "),
+    time: () => "Aago báyìí ní Nàìjíríà ni " + timeText("yo") + ".",
+    date: () => "Òní ni " + dateText("yo") + ".",
+    both: () => "Òní ni " + dateText("yo") + ". Aago báyìí ní Nàìjíríà ni " + timeText("yo") + ".",
+    unknown: () => "Má bínú, Ọ̀gá. Mo gbọ́ yín, ṣùgbọ́n mi ò tíì lóye àṣẹ yẹn.",
+    notHeard: () => "Má bínú, Ọ̀gá. Mi ò gbọ́ àṣẹ náà.",
+    fail: () => "Má bínú, Ọ̀gá. Mi ò lè parí àṣẹ náà.",
+    notConnected: () => "Má bínú, Ọ̀gá. Ìsopọ̀ sí cloud kò tíì ṣetán. Ẹ kọ́kọ́ sopọ̀.",
+    deviceOffline: () => "Má bínú, Ọ̀gá. Ẹ̀rọ aláṣẹ kò sí lórí ayélujára báyìí.",
+    welcome: () => "Ẹ káàbọ̀, Ọ̀gá. Orúkọ mi ni Alexa, olùrànlọ́wọ́ ilé ọlọ́gbọ́n yín. Ramatechcode Lab ló ṣe mí, ó kọ ètò mi, ó sì dá mi sílẹ̀ kí ayé yín lè rọrùn. Mo lè ṣàkóso iná, iná okùn, fáànù àti tẹlifíṣọ̀n. Mo ti ṣetán, Ọ̀gá.",
+    test: () => "Báwo ni, Ọ̀gá. Èyí ni Ramatech Home AI. Mò ń sọ̀rọ̀ ní kedere àti ní ìyára tó dára."
+  }
+};
+
+/* =====================================================================
+   SETTINGS (remembered on this device)
+   ===================================================================== */
+const UA = navigator.userAgent || "";
+const IS_MOBILE = /Android|iPhone|iPad|iPod/i.test(UA) || (navigator.maxTouchPoints > 1 && /Mac/i.test(navigator.platform || ""));
+const STORE_KEY = "ramatechHomeAI.v2";
+const DEFAULTS = () => ({ lang: "en", gender: "any", accent: "any", rate: IS_MOBILE ? 0.85 : 0.95, pitch: 1, voice: {}, tapSpeak: false });
+
+function loadSettings() {
+  const d = DEFAULTS();
+  try {
+    const saved = JSON.parse(localStorage.getItem(STORE_KEY) || "null");
+    if (saved && typeof saved === "object") {
+      Object.keys(d).forEach(k => { if (saved[k] !== undefined) d[k] = saved[k]; });
+      if (typeof d.voice !== "object" || !d.voice) d.voice = {};
+      if (!LANGS[d.lang]) d.lang = "en";
+    }
+  } catch (e) { /* storage blocked — run with defaults */ }
+  return d;
+}
+let S = loadSettings();
+function saveSettings() { try { localStorage.setItem(STORE_KEY, JSON.stringify(S)); } catch (e) {} }
+
+const $ = id => document.getElementById(id);
+const t = k => (UI[S.lang] && UI[S.lang][k]) || UI.en[k] || k;
+
+/* =====================================================================
+   STATE + TRANSPORT (cloud WebSocket or local ESP32 HTTP)
+   ===================================================================== */
+const status = { light: false, rope: false, fan: false, tv: false, known: false, online: false };
+let cloudSocket = null, cloudConnected = false, cloudState = "off";
+let cloudCode = ""; try { cloudCode = sessionStorage.getItem("RAMATECH_ACCESS_CODE") || ""; } catch (e) {}
+let reconnectTimer = null, reconnectDelay = 2000, intentionalClose = false;
+let lastOfflineAt = 0, localOK = false;
+const WS_URL = (location.protocol === "https:" ? "wss://" : "ws://") + location.host + "/ws";
+
+function applyStatus(m) {
+  DEV_KEYS.forEach(k => { if (m[k] !== undefined) status[k] = m[k] === true || m[k] === 1 || String(m[k]).toLowerCase() === "on" || String(m[k]).toLowerCase() === "true"; });
+  status.known = true;
+  if (m.online !== undefined) status.online = !!m.online;
+  renderTiles(); renderPills();
+}
+
+function connectCloud(code) {
+  if (IS_LOCAL) return;
+  if (code) cloudCode = code;
+  if (!cloudCode) { setCloud("off"); return; }
+  try { sessionStorage.setItem("RAMATECH_ACCESS_CODE", cloudCode); } catch (e) {}
+  clearTimeout(reconnectTimer);
+  intentionalClose = true;
+  if (cloudSocket) { try { cloudSocket.close(); } catch (e) {} }
+  intentionalClose = false;
+  setCloud("connecting");
+  let ws;
+  try { ws = new WebSocket(WS_URL); } catch (e) { scheduleReconnect(); return; }
+  cloudSocket = ws;
+  ws.onopen = () => ws.send(JSON.stringify({ type: "auth", role: "browser", code: cloudCode }));
+  ws.onmessage = ev => {
+    let msg; try { msg = JSON.parse(ev.data); } catch (e) { return; }
+    if (msg.type === "auth_ok") {
+      cloudConnected = true; reconnectDelay = 2000; setCloud("on"); requestStatus();
+    } else if (msg.type === "auth_error") {
+      cloudConnected = false; intentionalClose = true;
+      try { sessionStorage.removeItem("RAMATECH_ACCESS_CODE"); } catch (e) {}
+      cloudCode = ""; setCloud("bad");
+    } else if (msg.type === "status") {
+      applyStatus(msg);
+    } else if (msg.type === "device_offline") {
+      lastOfflineAt = Date.now(); status.online = false; renderPills();
+    }
+  };
+  ws.onclose = () => {
+    if (ws !== cloudSocket) return;
+    cloudConnected = false;
+    if (!intentionalClose && cloudCode) { setCloud("lost"); scheduleReconnect(); }
+  };
+  ws.onerror = () => {};
+}
+function scheduleReconnect() {
+  clearTimeout(reconnectTimer);
+  reconnectTimer = setTimeout(() => connectCloud(), reconnectDelay);
+  reconnectDelay = Math.min(reconnectDelay * 1.6, 15000);
+}
+function setCloud(s) { cloudState = s; renderPills(); renderConnectCard(); }
+
+function wsSend(obj) {
+  if (!cloudSocket || cloudSocket.readyState !== WebSocket.OPEN || !cloudConnected) return false;
+  cloudSocket.send(JSON.stringify(obj)); return true;
+}
+function requestStatus() {
+  if (IS_LOCAL) return localFetch("/status").then(applyStatus).then(() => { localOK = true; renderPills(); }).catch(() => { localOK = false; renderPills(); });
+  wsSend({ type: "status_request", deviceId: DEVICE_ID });
+}
+function localFetch(path) {
+  const ctl = new AbortController(); const to = setTimeout(() => ctl.abort(), 6000);
+  return fetch(path, { cache: "no-store", signal: ctl.signal })
+    .then(r => r.json().then(j => { if (!r.ok || j.ok === false) throw new Error(j.error || "HTTP " + r.status); return j; }))
+    .finally(() => clearTimeout(to));
+}
+
+/* Sends a command and resolves once it is safe to confirm out loud. */
+function sendDevice(device, state) {
+  if (IS_LOCAL) return localFetch("/control?device=" + encodeURIComponent(device) + "&state=" + state).then(j => { applyStatus(j); localOK = true; });
+  const sentAt = Date.now();
+  if (!wsSend({ type: "command", deviceId: DEVICE_ID, device, state })) return Promise.reject(new Error("not-connected"));
+  status[device] = state === "on"; renderTiles();
+  return new Promise((res, rej) => setTimeout(() => (lastOfflineAt >= sentAt ? rej(new Error("device-offline")) : res()), 700));
+}
+function sendAll(state) {
+  if (IS_LOCAL) return localFetch("/all?state=" + state).then(j => { applyStatus(j); localOK = true; });
+  const sentAt = Date.now();
+  if (!wsSend({ type: "all", deviceId: DEVICE_ID, state })) return Promise.reject(new Error("not-connected"));
+  DEV_KEYS.forEach(k => status[k] = state === "on"); renderTiles();
+  return new Promise((res, rej) => setTimeout(() => (lastOfflineAt >= sentAt ? rej(new Error("device-offline")) : res()), 700));
+}
+
+/* LCD feedback on the ESP32 (ASCII only — the 1602 cannot show Arabic or Yoruba letters) */
+function asciiOnly(s) { return String(s).normalize("NFKD").replace(/[̀-ͯ]/g, "").replace(/[^\x20-\x7E]/g, "").replace(/\s+/g, " ").trim(); }
+function lcdLabel(p, raw) {
+  const NM = { light: "LIGHT", rope: "ROPE", fan: "FAN", tv: "TV" };
+  const n = lagosNow(), mm = String(n.m).padStart(2, "0"), h12 = n.h % 12 || 12, ap = n.h < 12 ? "AM" : "PM";
+  const dShort = n.day + " " + MONTHS_EN3[n.mon] + " " + n.year, tShort = h12 + ":" + mm + " " + ap;
+  switch (p.intent) {
+    case "device": return NM[p.device] + ": " + p.state.toUpperCase();
+    case "all": return "ALL: " + p.state.toUpperCase();
+    case "status": return "STATUS";
+    case "time": return tShort;
+    case "date": return dShort;
+    case "both": return n.day + " " + MONTHS_EN3[n.mon] + " " + tShort;
+  }
+  return asciiOnly(raw).slice(0, 16) || "VOICE COMMAND";
+}
+function sendLcd(text) {
+  const line2 = String(text).slice(0, 16);
+  if (IS_LOCAL) { fetch("/display?text=" + encodeURIComponent(line2), { cache: "no-store" }).catch(() => {}); return; }
+  wsSend({ type: "display", deviceId: DEVICE_ID, line1: "VOICE COMMAND:", line2 });
+}
+
+/* =====================================================================
+   TEXT-TO-SPEECH — slower, chunked by sentence, selectable voices
+   ===================================================================== */
+const TTS_OK = "speechSynthesis" in window && "SpeechSynthesisUtterance" in window;
+let voices = [], speakToken = 0, keepAlive = [], speechUnlocked = false;
+
+const FEMALE_RE = /samantha|victoria|karen|moira|tessa|fiona|zira|\bava\b|susan|serena|kate|allison|joanna|salli|\bamy\b|emma|libby|sonia|aria|jenny|natasha|catherine|hazel|heera|linda|michelle|laila|zeina|mariam|hoda|salma|\bsara\b|noura|nicky|kendra|kimberly|\bivy\b|olivia|nova|shelley|sandy|\bflo\b|ellen|google uk english female|google us english|yelda|kyoko|milena|female/;
+const MALE_RE = /daniel|\balex\b|\bfred\b|david|james|george|oliver|thomas|arthur|\bguy\b|brian|ryan|\blee\b|aaron|\bmark\b|richard|rishi|maged|tarik|naayf|hamed|shakir|\bali\b|eddy|\breed\b|rocko|ralph|evan|gordon|matthew|steffan|liam|prabhat|ravi|mohamed|google uk english male|\bmale\b/;
+function guessGender(v) {
+  const n = (v.name || "").toLowerCase();
+  if (/#female|female|woman/.test(n)) return "female";
+  if (/#male|\bmale\b|\bman\b/.test(n)) return "male";
+  if (FEMALE_RE.test(n)) return "female";
+  if (MALE_RE.test(n)) return "male";
+  return "unknown";
+}
+const vlang = v => (v.lang || "").replace("_", "-").toLowerCase();
+
+const NOVELTY = /^(albert|bad news|bahh|bells|boing|bubbles|cellos|deranged|good news|hysterical|jester|organ|superstar|trinoids|whisper|wobble|zarvox|pipe organ)/i;
+function voicesFor(lang) {
+  const codes = LANGS[lang].tts;
+  return voices.filter(v => codes.some(c => vlang(v).startsWith(c)) && !NOVELTY.test(v.name || ""));
+}
+function pickVoice(lang) {
+  const all = voicesFor(lang);
+  const saved = S.voice[lang];
+  if (saved) { const m = all.find(v => v.voiceURI === saved); if (m) return m; }
+  let c = all.slice();
+  if (lang === "en" && S.accent !== "any") { const a = c.filter(v => vlang(v) === S.accent.toLowerCase()); if (a.length) c = a; }
+  if (S.gender !== "any") { const g = c.filter(v => guessGender(v) === S.gender); if (g.length) c = g; }
+  const score = v => (/premium|enhanced|natural|neural/i.test(v.name) ? 4 : 0) + (v.localService ? 1 : 0) + (v.default ? 1 : 0);
+  c.sort((a, b) => score(b) - score(a));
+  return c[0] || null;
+}
+function fallbackEnglish() {
+  const en = voicesFor("en");
+  return en.find(v => v.default) || en[0] || voices[0] || null;
+}
+
+function pronounce(text, lang) {
+  let s = String(text);
+  if (lang === "en" || lang === "yo") {
+    s = s.replace(/Ramatechcode/gi, "Rama tech code").replace(/RAMATECH/g, "Rama tech").replace(/Ramatech/g, "Rama tech").replace(/ESP32/g, "E S P 32");
+  }
+  return s;
+}
+function splitSentences(s) {
+  const parts = s.match(/[^.!?؟…]+[.!?؟…]*/g) || [s];
+  const out = [];
+  parts.forEach(p => { p = p.trim(); if (p) out.push(p); });
+  return out;
+}
+
+function stopSpeaking() {
+  speakToken++;
+  if (TTS_OK) { try { speechSynthesis.cancel(); } catch (e) {} }
+  keepAlive = [];
+}
+function unlockSpeech() {                         // iOS/Android only allow speech after a tap
+  if (speechUnlocked || !TTS_OK) return;
+  speechUnlocked = true;
+  try { const u = new SpeechSynthesisUtterance(" "); u.volume = 0; speechSynthesis.speak(u); } catch (e) {}
+}
+
+function speak(text) {
+  if (!TTS_OK) return;
+  stopSpeaking();
+  const my = speakToken;
+  const lang = S.lang;
+  let voice = pickVoice(lang), usedFallback = false;
+  if (!voice && lang !== "en") { voice = fallbackEnglish(); usedFallback = true; }
+  const chunks = splitSentences(pronounce(text, lang));
+  setVoiceState("speaking");
+  const play = i => {
+    if (my !== speakToken) return;
+    if (i >= chunks.length) { setVoiceState("ready"); return; }
+    const u = new SpeechSynthesisUtterance(chunks[i]);
+    u.rate = S.rate; u.pitch = S.pitch; u.volume = 1;
+    if (voice) { u.voice = voice; u.lang = voice.lang || LANGS[lang].stt; }
+    else u.lang = lang === "en" ? "en-US" : LANGS[lang].stt;
+    if (usedFallback) u.lang = voice ? voice.lang : "en-US";
+    u.onend = () => setTimeout(() => play(i + 1), 160);          // small gap between sentences = clearer speech
+    u.onerror = e => { if (my !== speakToken) return; if (e.error !== "interrupted" && e.error !== "canceled") setVoiceState("ready"); };
+    keepAlive.push(u);                                           // stop the browser garbage-collecting the utterance
+    try { speechSynthesis.speak(u); } catch (e) { setVoiceState("ready"); }
+  };
+  setTimeout(() => play(0), 90);                                 // Chrome needs a beat after cancel()
+}
+
+function loadVoices() {
+  if (!TTS_OK) return;
+  voices = speechSynthesis.getVoices() || [];
+  renderVoiceControls();
+}
+
+/* =====================================================================
+   SPEECH RECOGNITION
+   ===================================================================== */
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+let recog = null, listening = false;
+
+function startListening() {
+  unlockSpeech(); stopSpeaking();
+  if (!SR) { setVoiceStatus(t("unsupported"), true); return; }
+  if (listening) { try { recog.stop(); } catch (e) {} return; }
+  recog = new SR();
+  recog.lang = LANGS[S.lang].stt;
+  recog.continuous = false; recog.interimResults = true; recog.maxAlternatives = 4;
+  let finalDone = false;
+  recog.onstart = () => { listening = true; setVoiceState("listening"); };
+  recog.onresult = ev => {
+    const res = ev.results[ev.results.length - 1];
+    if (!res.isFinal) { setVoiceStatus("“" + res[0].transcript + "”"); return; }
+    finalDone = true;
+    const alts = []; for (let i = 0; i < res.length; i++) alts.push(res[i].transcript);
+    const best = alts.find(a => { const p = parse(a); return p.intent !== "unknown" && p.intent !== "empty"; }) || alts[0] || "";
+    setVoiceState("processing");
+    handleCommand(best, true);
+  };
+  recog.onerror = ev => {
+    listening = false;
+    const map = { "not-allowed": "errDenied", "service-not-allowed": "errService", "no-speech": "errNoSpeech", "audio-capture": "errAudio", "network": "errNetwork", "language-not-supported": "errLang" };
+    if (ev.error === "aborted") { setVoiceState("ready"); return; }
+    setVoiceStatus(t(map[ev.error] || "errService"), true);
+  };
+  recog.onend = () => {
+    listening = false;
+    if (!finalDone && micBtn.classList.contains("listening")) setVoiceState("ready");
+    micBtn.classList.remove("listening");
+  };
+  try { recog.start(); } catch (e) { listening = false; setVoiceStatus(t("errService"), true); }
+}
+
+/* =====================================================================
+   COMMAND HANDLING
+   ===================================================================== */
+function say(text) { addLog("bot", text); speak(text); }
+
+function errorReply(e) {
+  const m = (e && e.message) || "";
+  const r = R[S.lang];
+  if (m === "not-connected") return r.notConnected();
+  if (m === "device-offline") return r.deviceOffline();
+  return r.fail();
+}
+
+function handleCommand(raw, fromMic) {
+  raw = String(raw || "").trim();
+  const r = R[S.lang];
+  if (!raw) { say(r.notHeard()); return; }
+  addLog("user", raw);
+  const p = parse(raw);
+  sendLcd(lcdLabel(p, raw));
+  switch (p.intent) {
+    case "device":
+      sendDevice(p.device, p.state).then(() => say(r.device(p.device, p.state === "on"))).catch(e => say(errorReply(e)));
+      break;
+    case "all":
+      sendAll(p.state).then(() => say(r.all(p.state === "on"))).catch(e => say(errorReply(e)));
+      break;
+    case "status":
+      requestStatus();
+      say(status.known ? r.status(status) : r.fail());
+      break;
+    case "time": say(r.time()); break;
+    case "date": say(r.date()); break;
+    case "both": say(r.both()); break;
+    case "empty": say(r.empty()); break;
+    default: say((r[p.intent] || r.unknown)());
+  }
+}
+
+/* =====================================================================
+   RENDERING
+   ===================================================================== */
+const ICONS = {
+  light: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.8 10.6c.7.6 1 1.4 1 2.4h5.6c0-1 .3-1.8 1-2.4A6 6 0 0 0 12 3z"/></svg>',
+  rope: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 13c2.2-5 4.5-5 6.700 0s4.500 5 6.700 0 3.500-4 5.600-1.500"/><circle cx="5.500" cy="8" r=".9" fill="currentColor"/><circle cx="12" cy="16.500" r=".9" fill="currentColor"/><circle cx="18.500" cy="9" r=".9" fill="currentColor"/></svg>',
+  fan: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1.600"/><ellipse cx="12" cy="6.200" rx="2.600" ry="4.200"/><ellipse cx="12" cy="6.200" rx="2.600" ry="4.200" transform="rotate(120 12 12)"/><ellipse cx="12" cy="6.200" rx="2.600" ry="4.200" transform="rotate(240 12 12)"/></svg>',
+  tv: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="12" rx="2"/><path d="M8 21h8M12 17v4"/></svg>'
+};
+
+function buildTiles() {
+  const box = $("tiles"); box.innerHTML = "";
+  DEV_KEYS.forEach(k => {
+    const b = document.createElement("button");
+    b.type = "button"; b.className = "tile"; b.dataset.dev = k;
+    b.setAttribute("role", "switch"); b.setAttribute("aria-checked", "false");
+    b.innerHTML = '<span class="sw"></span><span class="ic">' + ICONS[k] + '</span><span><span class="nm"></span><br><span class="st"></span></span>';
+    b.addEventListener("click", () => tapDevice(k));
+    box.appendChild(b);
+  });
+}
+function renderTiles() {
+  document.querySelectorAll(".tile").forEach(b => {
+    const k = b.dataset.dev, on = !!status[k];
+    b.setAttribute("aria-checked", String(on));
+    b.querySelector(".nm").textContent = t(k);
+    b.querySelector(".st").textContent = status.known ? t(on ? "on" : "off") : t("unknown");
+  });
+}
+function renderPills() {
+  const pc = $("pillCloud"), pd = $("pillDevice");
+  if (IS_LOCAL) {
+    pc.hidden = true;
+    pd.dataset.s = localOK ? "ok" : "bad";
+    $("pillDeviceText").textContent = t(localOK ? "localOn" : "localOff");
+    return;
+  }
+  const map = { off: ["off", "cloudOff"], connecting: ["warn", "cloudConnecting"], on: ["ok", "cloudOn"], bad: ["bad", "cloudBad"], lost: ["warn", "cloudLost"] };
+  const [s, k] = map[cloudState] || map.off;
+  pc.dataset.s = s; $("pillCloudText").textContent = t(k);
+  const live = cloudState === "on";
+  pd.dataset.s = !live ? "off" : status.online ? "ok" : "bad";
+  $("pillDeviceText").textContent = !live ? "—" : t(status.online ? "devOnline" : "devOffline");
+}
+function renderConnectCard() { $("connectCard").hidden = IS_LOCAL || cloudState === "on"; }
+
+function setVoiceStatus(text, isErr) {
+  const el = $("voiceStatus"); el.textContent = text; el.dataset.s = isErr ? "err" : "";
+  if (isErr) { micBtn.classList.remove("listening", "busy"); }
+}
+function setVoiceState(s) {
+  micBtn.classList.toggle("listening", s === "listening");
+  micBtn.classList.toggle("busy", s === "processing" || s === "speaking");
+  setVoiceStatus(t(s));
+}
+const logItems = [];
+function addLog(who, text) {
+  logItems.push({ who, text }); if (logItems.length > 8) logItems.shift();
+  renderLog();
+}
+function renderLog() {
+  const box = $("log"); box.setAttribute("data-empty", t("empty")); box.innerHTML = "";
+  logItems.forEach(it => {
+    const d = document.createElement("div"); d.className = "msg " + it.who;
+    const s = document.createElement("small"); s.textContent = it.who === "user" ? t("you") : t("bot");
+    d.appendChild(s); d.appendChild(document.createTextNode(it.text)); box.appendChild(d);
+  });
+  box.scrollTop = box.scrollHeight;
+}
+function renderChips() {
+  const box = $("chips"); box.innerHTML = "";
+  (UI[S.lang].chips || []).forEach(txt => {
+    const b = document.createElement("button"); b.type = "button"; b.className = "chip"; b.textContent = txt;
+    b.addEventListener("click", () => { unlockSpeech(); handleCommand(txt); });
+    box.appendChild(b);
+  });
+}
+
+/* ---- voice settings UI ---- */
+function opt(value, label) { const o = document.createElement("option"); o.value = value; o.textContent = label; return o; }
+function renderVoiceControls() {
+  const g = $("genderSel"); g.innerHTML = "";
+  [["any", "any"], ["female", "female"], ["male", "male"]].forEach(([v, k]) => g.appendChild(opt(v, t(k))));
+  g.value = S.gender;
+
+  const a = $("accentSel"); a.innerHTML = "";
+  [["any", t("any")], ["en-US", "American (US)"], ["en-GB", "British (UK)"], ["en-NG", "Nigerian"], ["en-AU", "Australian"], ["en-IN", "Indian"], ["en-ZA", "South African"]]
+    .forEach(([v, l]) => a.appendChild(opt(v, l)));
+  a.value = S.accent;
+  $("accentWrap").hidden = S.lang !== "en";
+
+  const vs = $("voiceSel"); vs.innerHTML = ""; vs.appendChild(opt("", t("auto")));
+  const list = voicesFor(S.lang);
+  list.forEach(v => {
+    const gd = guessGender(v);
+    vs.appendChild(opt(v.voiceURI, v.name + " (" + v.lang + (gd !== "unknown" ? ", " + gd : "") + ")"));
+  });
+  vs.value = S.voice[S.lang] && list.some(v => v.voiceURI === S.voice[S.lang]) ? S.voice[S.lang] : "";
+
+  const nv = $("noVoice");
+  nv.hidden = !(TTS_OK && voices.length && !list.length);
+  nv.textContent = t("noVoice");
+  $("rate").value = S.rate; $("pitch").value = S.pitch; $("tapSpeak").checked = !!S.tapSpeak;
+  $("rateVal").textContent = Number(S.rate).toFixed(2) + "×"; $("pitchVal").textContent = Number(S.pitch).toFixed(2);
+}
+
+function applyLanguage() {
+  const L = LANGS[S.lang];
+  document.documentElement.lang = S.lang; document.documentElement.dir = L.dir;
+  document.querySelectorAll("[data-i18n]").forEach(el => { el.textContent = t(el.dataset.i18n); });
+  document.querySelectorAll("[data-i18n-ph]").forEach(el => { el.placeholder = t(el.dataset.i18nPh); });
+  document.querySelectorAll(".seg button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.lang === S.lang)));
+  micBtn.setAttribute("aria-label", t("micLabel"));
+  renderTiles(); renderPills(); renderLog(); renderChips(); renderVoiceControls();
+  if (!listening) setVoiceState("ready");
+  $("browserHint").textContent = SR ? "" : t("unsupported");
+}
+
+/* =====================================================================
+   EVENTS + START
+   ===================================================================== */
+const micBtn = $("micBtn");
+
+function tapDevice(k) {
+  unlockSpeech();
+  const next = status[k] ? "off" : "on";
+  sendDevice(k, next).then(() => { if (S.tapSpeak) say(R[S.lang].device(k, next === "on")); })
+    .catch(e => say(errorReply(e)));
+}
+
+micBtn.addEventListener("click", startListening);
+$("allOn").addEventListener("click", () => { unlockSpeech(); sendAll("on").then(() => { if (S.tapSpeak) say(R[S.lang].all(true)); }).catch(e => say(errorReply(e))); });
+$("allOff").addEventListener("click", () => { unlockSpeech(); sendAll("off").then(() => { if (S.tapSpeak) say(R[S.lang].all(false)); }).catch(e => say(errorReply(e))); });
+$("typeForm").addEventListener("submit", e => { e.preventDefault(); unlockSpeech(); const v = $("typeInput").value; $("typeInput").value = ""; if (v.trim()) handleCommand(v); });
+$("connectForm").addEventListener("submit", e => { e.preventDefault(); const v = $("codeInput").value.trim(); if (v) { $("codeInput").value = ""; connectCloud(v); } });
+
+document.querySelectorAll(".seg button").forEach(b => b.addEventListener("click", () => {
+  if (S.lang === b.dataset.lang) return;
+  stopSpeaking(); if (listening && recog) { try { recog.abort(); } catch (e) {} }
+  S.lang = b.dataset.lang; saveSettings(); applyLanguage();
+}));
+$("genderSel").addEventListener("change", e => { S.gender = e.target.value; S.voice[S.lang] = ""; saveSettings(); renderVoiceControls(); });
+$("accentSel").addEventListener("change", e => { S.accent = e.target.value; S.voice[S.lang] = ""; saveSettings(); renderVoiceControls(); });
+$("voiceSel").addEventListener("change", e => { S.voice[S.lang] = e.target.value; saveSettings(); });
+$("rate").addEventListener("input", e => { S.rate = Number(e.target.value); $("rateVal").textContent = S.rate.toFixed(2) + "×"; saveSettings(); });
+$("pitch").addEventListener("input", e => { S.pitch = Number(e.target.value); $("pitchVal").textContent = S.pitch.toFixed(2); saveSettings(); });
+document.querySelectorAll("[data-rate]").forEach(b => b.addEventListener("click", () => { S.rate = Number(b.dataset.rate); saveSettings(); renderVoiceControls(); unlockSpeech(); speak(R[S.lang].test()); }));
+$("tapSpeak").addEventListener("change", e => { S.tapSpeak = e.target.checked; saveSettings(); });
+$("testBtn").addEventListener("click", () => { unlockSpeech(); speak(R[S.lang].test()); });
+$("welcomeBtn").addEventListener("click", () => { unlockSpeech(); say(R[S.lang].welcome()); });
+$("resetBtn").addEventListener("click", () => { const lang = S.lang; S = DEFAULTS(); S.lang = lang; saveSettings(); renderVoiceControls(); });
+document.addEventListener("pointerdown", unlockSpeech, { once: true });
+
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState !== "visible") return;
+  if (IS_LOCAL) requestStatus();
+  else if (cloudCode && (!cloudSocket || cloudSocket.readyState > 1)) connectCloud();
+});
+
+/* init */
+buildTiles();
+$("apkCard").hidden = IS_LOCAL;
+if (TTS_OK) {
+  loadVoices();
+  if (speechSynthesis.addEventListener) speechSynthesis.addEventListener("voiceschanged", loadVoices);
+  else speechSynthesis.onvoiceschanged = loadVoices;
+  setTimeout(loadVoices, 600); setTimeout(loadVoices, 1800);
+}
+applyLanguage();
+renderConnectCard();
+if (IS_LOCAL) { requestStatus(); setInterval(requestStatus, 4000); }
+else {
+  if (cloudCode) connectCloud();
+  setInterval(() => { if (cloudConnected) requestStatus(); }, 8000);
+}
+
+if (!IS_LOCAL && "serviceWorker" in navigator) {
+  window.addEventListener("load", () => { navigator.serviceWorker.register("/sw.js").catch(() => {}); });
+}
+</script>
+</body>
+</html>
