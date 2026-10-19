@@ -247,10 +247,10 @@ input[type=range] { width: 100%; accent-color: var(--accent); }
 
   <!-- ================= CLOUD CONNECT ================= -->
   <section class="card" id="connectCard">
-    <h2 data-i18n="remote">Remote connection</h2>
+    <h2 id="connectTitle" data-i18n="remote">Remote connection</h2>
     <form class="row" id="connectForm" autocomplete="off">
       <input type="password" id="codeInput" inputmode="numeric" data-i18n-ph="accessCode" placeholder="Access code" aria-label="Access code">
-      <button class="btn primary" type="submit" data-i18n="connect">Connect</button>
+      <button class="btn primary" type="submit" id="connectBtn" data-i18n="connect">Connect</button>
     </form>
   </section>
 
@@ -314,6 +314,7 @@ input[type=range] { width: 100%; accent-color: var(--accent); }
     <div class="range-head"><span data-i18n="pitch">Pitch</span><b id="pitchVal">1.00</b></div>
     <input type="range" id="pitch" min="0.6" max="1.5" step="0.05">
 
+    <label class="check"><input type="checkbox" id="onlineVoice"><span data-i18n="onlineVoice">Use the online voice for Arabic and Yoruba (clearer, needs internet)</span></label>
     <label class="check"><input type="checkbox" id="tapSpeak"><span data-i18n="tapSpeak">Speak a confirmation when I use the buttons</span></label>
 
     <div class="row" style="margin-top:16px">
@@ -348,6 +349,7 @@ input[type=range] { width: 100%; accent-color: var(--accent); }
 const MODE = "cloud"; /*MODE_MARK*/
 const IS_LOCAL = MODE === "local";
 const DEVICE_ID = "RAMATECH_HOME_01";
+const TTS_BASE = ""; /*TTS_BASE_MARK*/   // "" = same site (Render). The ESP32 copy points at your Render URL.
 
 /*PURE_START*/
 /* =====================================================================
@@ -489,6 +491,7 @@ const UI = {
     localOn: "Local controller online", localOff: "Cannot reach controller",
     voiceTitle: "Voice assistant", micLabel: "Speak",
     ready: "Tap the microphone and speak", listening: "Listening… speak now", processing: "Processing…", speaking: "Speaking…",
+    onlineVoice: "Use the online voice for Arabic and Yoruba (clearer, needs internet)", voiceCode: "Access code for the online voice", save: "Save",
     typePh: "Type a command…", send: "Send", empty: "Your conversation will appear here.",
     you: "You", bot: "Alexa",
     devicesTitle: "Appliances", light: "Light", rope: "Rope light", fan: "Fan", tv: "Television",
@@ -499,7 +502,7 @@ const UI = {
     tapSpeak: "Speak a confirmation when I use the buttons",
     test: "Test voice", welcomeBtn: "Welcome message", reset: "Reset",
     voiceNote: "Available voices depend on your phone or browser. Gender labels are guessed from voice names.",
-    noVoice: "No English voice was found on this device. The reply will use the closest available voice, so pronunciation may be approximate. The text always shows on screen.",
+    noVoice: "No voice for this language was found on this device. Turn on the online voice below, or install a voice in your phone settings. The text always shows on screen.",
     appTitle: "Android app", appText: "Download the RAMATECH HOME AI Android app.", download: "Download APK",
     credit: "Designed, programmed and developed by",
     errDenied: "Microphone permission is blocked. Allow microphone access for this site in your browser settings.",
@@ -520,6 +523,7 @@ const UI = {
     localOn: "وحدة التحكم المحلية متصلة", localOff: "تعذّر الوصول إلى وحدة التحكم",
     voiceTitle: "المساعد الصوتي", micLabel: "تحدث",
     ready: "اضغط على الميكروفون وتحدث", listening: "أستمع… تحدث الآن", processing: "جارٍ المعالجة…", speaking: "أتحدث…",
+    onlineVoice: "استخدام الصوت عبر الإنترنت للعربية واليوروبا (أوضح، يحتاج إنترنت)", voiceCode: "رمز الدخول للصوت عبر الإنترنت", save: "حفظ",
     typePh: "اكتب أمراً…", send: "إرسال", empty: "ستظهر المحادثة هنا.",
     you: "أنت", bot: "أليكسا",
     devicesTitle: "الأجهزة", light: "الضوء", rope: "شريط الإضاءة", fan: "المروحة", tv: "التلفزيون",
@@ -530,7 +534,7 @@ const UI = {
     tapSpeak: "انطق تأكيداً عند استخدام الأزرار",
     test: "تجربة الصوت", welcomeBtn: "رسالة الترحيب", reset: "إعادة ضبط",
     voiceNote: "الأصوات المتاحة تعتمد على هاتفك أو متصفحك. يتم تخمين النوع من اسم الصوت.",
-    noVoice: "لم يتم العثور على صوت عربي في هذا الجهاز. سيُستخدم أقرب صوت متاح وقد يكون النطق تقريبياً. النص يظهر دائماً على الشاشة.",
+    noVoice: "لم يتم العثور على صوت لهذه اللغة في هذا الجهاز. فعّل الصوت عبر الإنترنت أدناه أو ثبّت صوتاً من إعدادات الهاتف. النص يظهر دائماً على الشاشة.",
     appTitle: "تطبيق أندرويد", appText: "حمّل تطبيق RAMATECH HOME AI لأندرويد.", download: "تحميل APK",
     credit: "تصميم وبرمجة وتطوير",
     errDenied: "إذن الميكروفون محظور. اسمح بالوصول إلى الميكروفون لهذا الموقع من إعدادات المتصفح.",
@@ -551,6 +555,7 @@ const UI = {
     localOn: "Ẹ̀rọ aláṣẹ ibẹ̀ wà lórí ayélujára", localOff: "Kò lè dé ẹ̀rọ aláṣẹ",
     voiceTitle: "Olùrànlọ́wọ́ ohùn", micLabel: "Sọ̀rọ̀",
     ready: "Tẹ makirofóònù kí ẹ sì sọ̀rọ̀", listening: "Ń gbọ́… ẹ sọ̀rọ̀ báyìí", processing: "Ń ṣiṣẹ́ lórí rẹ̀…", speaking: "Ń sọ̀rọ̀…",
+    onlineVoice: "Lo ohùn orí ayélujára fún Lárúbáwá àti Yorùbá (ó yéni jù, ó nílò ayélujára)", voiceCode: "Kóòdù àyè fún ohùn orí ayélujára", save: "Fi pamọ́",
     typePh: "Kọ àṣẹ síbí…", send: "Fi ránṣẹ́", empty: "Ọ̀rọ̀ yín yóò hàn níbí.",
     you: "Ẹ̀yin", bot: "Alexa",
     devicesTitle: "Àwọn ohun èlò", light: "Iná", rope: "Iná okùn", fan: "Fáànù", tv: "Tẹlifíṣọ̀n",
@@ -561,7 +566,7 @@ const UI = {
     tapSpeak: "Sọ ìdánilójú nígbà tí mo bá tẹ bọ́tìnì",
     test: "Dán ohùn wò", welcomeBtn: "Ọ̀rọ̀ káàbọ̀", reset: "Tún ṣe",
     voiceNote: "Àwọn ohùn tó wà dá lórí fóònù tàbí brówsà yín. A máa ń ṣe àfojúsùn ẹ̀yà ohùn látinú orúkọ rẹ̀.",
-    noVoice: "A kò rí ohùn Yorùbá lórí ẹ̀rọ yìí. Ohùn tó súnmọ́ jù lọ ni a ó lò, nítorí náà ìpè lè má péye. Ọ̀rọ̀ náà máa ń hàn lórí ìkànnì nígbà gbogbo.",
+    noVoice: "A kò rí ohùn fún èdè yìí lórí ẹ̀rọ yìí. Ẹ tan ohùn orí ayélujára ní ìsàlẹ̀, tàbí kí ẹ fi ohùn sórí fóònù. Ọ̀rọ̀ náà máa ń hàn lórí ìkànnì nígbà gbogbo.",
     appTitle: "Áàpù Android", appText: "Ṣe ìgbàsílẹ̀ áàpù RAMATECH HOME AI fún Android.", download: "Gba APK",
     credit: "Ṣe ìgbékalẹ̀, kọ ètò àti dá sílẹ̀ láti ọwọ́",
     errDenied: "A ti dínà ààyè makirofóònù. Ẹ gba ààyè makirofóònù fún ojúlé yìí nínú ètò brówsà.",
@@ -691,7 +696,7 @@ const R = {
 const UA = navigator.userAgent || "";
 const IS_MOBILE = /Android|iPhone|iPad|iPod/i.test(UA) || (navigator.maxTouchPoints > 1 && /Mac/i.test(navigator.platform || ""));
 const STORE_KEY = "ramatechHomeAI.v2";
-const DEFAULTS = () => ({ lang: "en", gender: "any", accent: "any", rate: IS_MOBILE ? 0.85 : 0.95, pitch: 1, voice: {}, tapSpeak: false });
+const DEFAULTS = () => ({ lang: "en", gender: "any", accent: "any", rate: IS_MOBILE ? 0.85 : 0.95, pitch: 1, voice: {}, tapSpeak: false, online: true });
 
 function loadSettings() {
   const d = DEFAULTS();
@@ -876,26 +881,92 @@ function splitSentences(s) {
   return out;
 }
 
+/* ---- online voice (Arabic / Yoruba): audio made by the server, played in an <audio> tag ---- */
+const SILENT_WAV = "data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=";
+let audioEl = null;
+const ttsCache = new Map();
+
+function ttsCode() {
+  if (!IS_LOCAL) return cloudCode;
+  try { return localStorage.getItem("ramatechHomeAI.ttsCode") || ""; } catch (e) { return ""; }
+}
+function fetchTTS(lang, text) {
+  const key = lang + "|" + text;
+  if (ttsCache.has(key)) return Promise.resolve(ttsCache.get(key));
+  const ctl = new AbortController(); const to = setTimeout(() => ctl.abort(), 20000);
+  const url = TTS_BASE + "/tts?lang=" + lang + "&code=" + encodeURIComponent(ttsCode()) + "&text=" + encodeURIComponent(text);
+  return fetch(url, { signal: ctl.signal })
+    .then(r => {
+      if (r.status === 403 && IS_LOCAL) { try { localStorage.removeItem("ramatechHomeAI.ttsCode"); } catch (e) {} renderConnectCard(); }
+      return (r.ok && /audio/i.test(r.headers.get("content-type") || "")) ? r.blob() : null;
+    })
+    .then(b => { if (!b || b.size < 200) return null; const u = URL.createObjectURL(b); ttsCache.set(key, u); return u; })
+    .catch(() => null)
+    .finally(() => clearTimeout(to));
+}
+function playUrl(url, my) {
+  return new Promise(resolve => {
+    if (!audioEl) audioEl = new Audio();
+    const a = audioEl;
+    a.onended = () => resolve(true);
+    a.onerror = () => resolve(false);
+    a.src = url;
+    const pr = Math.min(1.25, Math.max(0.6, S.rate / 0.9));      // slider also slows/speeds the online voice
+    a.playbackRate = pr; a.defaultPlaybackRate = pr;
+    a.preservesPitch = true; a.webkitPreservesPitch = true;
+    const p = a.play();
+    if (p && p.catch) p.catch(() => resolve(false));
+  });
+}
+/* resolves true if the online voice handled the speech, false if the device voice should take over */
+async function speakOnline(chunks, lang, my) {
+  const jobs = chunks.map(c => fetchTTS(lang, c));               // fetch all sentences in parallel, play in order
+  let played = 0;
+  for (let i = 0; i < chunks.length; i++) {
+    const url = await jobs[i];
+    if (my !== speakToken) return true;
+    if (!url) { if (played === 0) return false; continue; }
+    const ok = await playUrl(url, my);
+    if (my !== speakToken) return true;
+    if (!ok) { if (played === 0) return false; continue; }
+    played++;
+    await new Promise(r => setTimeout(r, 120));
+  }
+  return true;
+}
+
 function stopSpeaking() {
   speakToken++;
   if (TTS_OK) { try { speechSynthesis.cancel(); } catch (e) {} }
+  if (audioEl) { try { audioEl.pause(); } catch (e) {} }
   keepAlive = [];
 }
-function unlockSpeech() {                         // iOS/Android only allow speech after a tap
-  if (speechUnlocked || !TTS_OK) return;
+function unlockSpeech() {                         // iOS/Android only allow speech/audio after a tap
+  if (speechUnlocked) return;
   speechUnlocked = true;
-  try { const u = new SpeechSynthesisUtterance(" "); u.volume = 0; speechSynthesis.speak(u); } catch (e) {}
+  if (TTS_OK) { try { const u = new SpeechSynthesisUtterance(" "); u.volume = 0; speechSynthesis.speak(u); } catch (e) {} }
+  try { audioEl = audioEl || new Audio(); audioEl.src = SILENT_WAV; const p = audioEl.play(); if (p && p.catch) p.catch(() => {}); } catch (e) {}
 }
 
 function speak(text) {
-  if (!TTS_OK) return;
   stopSpeaking();
   const my = speakToken;
   const lang = S.lang;
-  let voice = pickVoice(lang), usedFallback = false;
-  if (!voice && lang !== "en") { voice = fallbackEnglish(); usedFallback = true; }
   const chunks = splitSentences(pronounce(text, lang));
   setVoiceState("speaking");
+  const wantsOnline = S.online && (lang === "ar" || lang === "yo") && !S.voice[lang];
+  if (wantsOnline) {
+    speakOnline(chunks, lang, my).then(done => {
+      if (my !== speakToken) return;
+      if (done) setVoiceState("ready"); else speakDevice(chunks, lang, my);
+    });
+  } else speakDevice(chunks, lang, my);
+}
+
+function speakDevice(chunks, lang, my) {
+  if (!TTS_OK) { setVoiceState("ready"); return; }
+  let voice = pickVoice(lang), usedFallback = false;
+  if (!voice && lang !== "en") { voice = fallbackEnglish(); usedFallback = true; }
   const play = i => {
     if (my !== speakToken) return;
     if (i >= chunks.length) { setVoiceState("ready"); return; }
@@ -1039,7 +1110,17 @@ function renderPills() {
   pd.dataset.s = !live ? "off" : status.online ? "ok" : "bad";
   $("pillDeviceText").textContent = !live ? "—" : t(status.online ? "devOnline" : "devOffline");
 }
-function renderConnectCard() { $("connectCard").hidden = IS_LOCAL || cloudState === "on"; }
+function renderConnectCard() {
+  if (IS_LOCAL) {
+    $("connectCard").hidden = !!ttsCode();
+    $("connectTitle").dataset.i18n = "voiceCode";
+    $("connectTitle").textContent = t("voiceCode");
+    $("connectBtn").dataset.i18n = "save";
+    $("connectBtn").textContent = t("save");
+    return;
+  }
+  $("connectCard").hidden = cloudState === "on";
+}
 
 function setVoiceStatus(text, isErr) {
   const el = $("voiceStatus"); el.textContent = text; el.dataset.s = isErr ? "err" : "";
@@ -1095,9 +1176,9 @@ function renderVoiceControls() {
   vs.value = S.voice[S.lang] && list.some(v => v.voiceURI === S.voice[S.lang]) ? S.voice[S.lang] : "";
 
   const nv = $("noVoice");
-  nv.hidden = !(TTS_OK && voices.length && !list.length);
+  nv.hidden = !(S.lang !== "en" && !S.online && !list.length);
   nv.textContent = t("noVoice");
-  $("rate").value = S.rate; $("pitch").value = S.pitch; $("tapSpeak").checked = !!S.tapSpeak;
+  $("rate").value = S.rate; $("pitch").value = S.pitch; $("tapSpeak").checked = !!S.tapSpeak; $("onlineVoice").checked = !!S.online;
   $("rateVal").textContent = Number(S.rate).toFixed(2) + "×"; $("pitchVal").textContent = Number(S.pitch).toFixed(2);
 }
 
@@ -1129,7 +1210,12 @@ micBtn.addEventListener("click", startListening);
 $("allOn").addEventListener("click", () => { unlockSpeech(); sendAll("on").then(() => { if (S.tapSpeak) say(R[S.lang].all(true)); }).catch(e => say(errorReply(e))); });
 $("allOff").addEventListener("click", () => { unlockSpeech(); sendAll("off").then(() => { if (S.tapSpeak) say(R[S.lang].all(false)); }).catch(e => say(errorReply(e))); });
 $("typeForm").addEventListener("submit", e => { e.preventDefault(); unlockSpeech(); const v = $("typeInput").value; $("typeInput").value = ""; if (v.trim()) handleCommand(v); });
-$("connectForm").addEventListener("submit", e => { e.preventDefault(); const v = $("codeInput").value.trim(); if (v) { $("codeInput").value = ""; connectCloud(v); } });
+$("connectForm").addEventListener("submit", e => {
+  e.preventDefault(); const v = $("codeInput").value.trim(); if (!v) return;
+  $("codeInput").value = "";
+  if (IS_LOCAL) { try { localStorage.setItem("ramatechHomeAI.ttsCode", v); } catch (err) {} $("connectCard").hidden = true; }
+  else connectCloud(v);
+});
 
 document.querySelectorAll(".seg button").forEach(b => b.addEventListener("click", () => {
   if (S.lang === b.dataset.lang) return;
@@ -1143,6 +1229,7 @@ $("rate").addEventListener("input", e => { S.rate = Number(e.target.value); $("r
 $("pitch").addEventListener("input", e => { S.pitch = Number(e.target.value); $("pitchVal").textContent = S.pitch.toFixed(2); saveSettings(); });
 document.querySelectorAll("[data-rate]").forEach(b => b.addEventListener("click", () => { S.rate = Number(b.dataset.rate); saveSettings(); renderVoiceControls(); unlockSpeech(); speak(R[S.lang].test()); }));
 $("tapSpeak").addEventListener("change", e => { S.tapSpeak = e.target.checked; saveSettings(); });
+$("onlineVoice").addEventListener("change", e => { S.online = e.target.checked; saveSettings(); renderVoiceControls(); });
 $("testBtn").addEventListener("click", () => { unlockSpeech(); speak(R[S.lang].test()); });
 $("welcomeBtn").addEventListener("click", () => { unlockSpeech(); say(R[S.lang].welcome()); });
 $("resetBtn").addEventListener("click", () => { const lang = S.lang; S = DEFAULTS(); S.lang = lang; saveSettings(); renderVoiceControls(); });

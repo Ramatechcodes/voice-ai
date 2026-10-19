@@ -1,5 +1,5 @@
 
-const CACHE_NAME = "ramatech-home-ai-v2";
+const CACHE_NAME = "ramatech-home-ai-v3";
 
 const APP_FILES = [
   "/",
@@ -51,6 +51,7 @@ self.addEventListener("fetch", (event) => {
   // Keep API status and other dynamic responses live.
   if (
     url.pathname === "/status" ||
+    url.pathname === "/tts" ||
     url.pathname.startsWith("/api/")
   ) {
     return;
