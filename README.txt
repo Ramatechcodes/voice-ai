@@ -42,3 +42,10 @@ Phones rarely include Arabic/Yoruba voices, so the server makes the audio (/tts)
            (uses Meta MMS-TTS Yoruba). Without it the app falls back to the phone's own voice.
   Optional: HF_TTS_BASE to point at a different Hugging Face endpoint.
 The ESP32 local page uses your Render site for this voice; type your ACCESS_CODE into its box once.
+
+YORUBA VOICE TROUBLESHOOTING
+Open  https://YOUR-APP.onrender.com/tts-test?code=YOUR_ACCESS_CODE&lang=yo  in a browser.
+It shows, for each voice provider, whether it works and the exact error.
+Optional self-hosted Yoruba voice (untested, needs a bigger Render plan):
+  npm install @huggingface/transformers   (commit package.json + package-lock.json)
+  Render env:  YO_LOCAL=1

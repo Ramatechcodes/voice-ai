@@ -65,8 +65,8 @@ async function googleTTS(lang, text) {
   return { buf: Buffer.from(await r.arrayBuffer()), type };
 }
 async function hfTTS(lang, text) {
-  if (!HF_TOKEN) throw new Error("no HF_TOKEN");
-  let lastErr = new Error("hf failed");
+  if (!HF_TOKEN) throw new Error("HF_TOKEN is not set on this server");
+  const errors = [];
   for (const base of HF_BASES) {
     try {
       const r = await fetchWithTimeout(base + HF_MODELS[lang], {
@@ -76,12 +76,47 @@ async function hfTTS(lang, text) {
       }, 30000);
       const type = r.headers.get("content-type") || "";
       if (r.ok && type.startsWith("audio")) return { buf: Buffer.from(await r.arrayBuffer()), type };
-      lastErr = new Error("hf tts " + r.status);
-    } catch (e) { lastErr = e; }
+      const body = (await r.text()).replace(/\s+/g, " ").slice(0, 160);
+      errors.push(base + " -> HTTP " + r.status + " " + body);
+    } catch (e) { errors.push(base + " -> " + e.message); }
   }
-  throw lastErr;
+  throw new Error(errors.join(" | "));
 }
-const TTS_CHAIN = { ar: [googleTTS, hfTTS], yo: [hfTTS, googleTTS] };
+
+// OPTIONAL: run Meta's MMS Yoruba model on this server (set YO_LOCAL=1 and `npm i @huggingface/transformers`).
+let localSynth = null;
+async function localMmsTTS(lang, text) {
+  if (process.env.YO_LOCAL !== "1" || lang !== "yo") throw new Error("local MMS is off (set YO_LOCAL=1)");
+  if (!localSynth) {
+    const { pipeline } = await import("@huggingface/transformers");
+    localSynth = await pipeline("text-to-speech", process.env.YO_LOCAL_MODEL || "Xenova/mms-tts-yor");
+  }
+  const out = await localSynth(text);
+  const pcm = Buffer.alloc(out.audio.length * 2);
+  for (let i = 0; i < out.audio.length; i++) pcm.writeInt16LE(Math.max(-32768, Math.min(32767, Math.round(out.audio[i] * 32767))), i * 2);
+  const h = Buffer.alloc(44);
+  h.write("RIFF", 0); h.writeUInt32LE(36 + pcm.length, 4); h.write("WAVEfmt ", 8); h.writeUInt32LE(16, 16);
+  h.writeUInt16LE(1, 20); h.writeUInt16LE(1, 22); h.writeUInt32LE(out.sampling_rate, 24); h.writeUInt32LE(out.sampling_rate * 2, 28);
+  h.writeUInt16LE(2, 32); h.writeUInt16LE(16, 34); h.write("data", 36); h.writeUInt32LE(pcm.length, 40);
+  return { buf: Buffer.concat([h, pcm]), type: "audio/wav" };
+}
+const PROVIDERS = { google: googleTTS, huggingface: hfTTS, "local-mms": localMmsTTS };
+// Yoruba: the self-hosted Meta MMS voice first (Hugging Face's free API does not serve this model, Google has no Yoruba).
+const TTS_CHAIN = { ar: ["google", "huggingface"], yo: ["local-mms", "huggingface"] };
+
+// Open /tts-test?code=YOUR_ACCESS_CODE&lang=yo in a browser to see exactly which voice provider works.
+app.get("/tts-test", async (req, res) => {
+  if (req.query.code !== ACCESS_CODE) return res.status(403).end();
+  const lang = req.query.lang === "ar" ? "ar" : "yo";
+  const text = lang === "ar" ? "مرحبا سيدي" : "Báwo ni, Ọ̀gá";
+  const report = { lang, hfTokenSet: !!HF_TOKEN, localMmsEnabled: process.env.YO_LOCAL === "1", providers: [] };
+  for (const name of TTS_CHAIN[lang]) {
+    const t0 = Date.now();
+    try { const o = await PROVIDERS[name](lang, text); report.providers.push({ name, ok: true, bytes: o.buf.length, type: o.type, ms: Date.now() - t0 }); }
+    catch (e) { report.providers.push({ name, ok: false, error: String(e.message).slice(0, 600), ms: Date.now() - t0 }); }
+  }
+  res.json(report);
+});
 
 app.get("/tts", async (req, res) => {
   res.set("Access-Control-Allow-Origin", "*");           // lets the ESP32 local page use this voice
@@ -100,11 +135,11 @@ app.get("/tts", async (req, res) => {
   const key = lang + "|" + text;
   let out = ttsCache.get(key);
   if (!out) {
-    let lastErr;
-    for (const provider of TTS_CHAIN[lang]) {
-      try { out = await provider(lang, text); break; } catch (e) { lastErr = e; }
+    for (const name of TTS_CHAIN[lang]) {
+      try { out = await PROVIDERS[name](lang, text); break; }
+      catch (e) { console.log("TTS provider '" + name + "' failed for " + lang + ": " + e.message); }
     }
-    if (!out) { console.log("TTS failed for", lang, lastErr && lastErr.message); return res.status(502).end(); }
+    if (!out) return res.status(502).end();
     ttsCache.set(key, out);
     if (ttsCache.size > 300) ttsCache.delete(ttsCache.keys().next().value);
   }
@@ -254,4 +289,9 @@ setInterval(() => {
 server.listen(PORT, "0.0.0.0", () => {
   console.log(`RAMATECH HOME AI Cloud running on port ${PORT}`);
   console.log(`Device ID: ${DEVICE_ID}`);
+
+  // Load the Yoruba voice in the background so the first spoken reply is not slow.
+  if (process.env.YO_LOCAL === "1") {
+    localMmsTTS("yo", "Báwo ni").then(() => console.log("Yoruba voice ready")).catch(e => console.log("Yoruba voice warm-up failed: " + e.message));
+  }
 });

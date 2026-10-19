@@ -491,6 +491,7 @@ const UI = {
     localOn: "Local controller online", localOff: "Cannot reach controller",
     voiceTitle: "Voice assistant", micLabel: "Speak",
     ready: "Tap the microphone and speak", listening: "Listening… speak now", processing: "Processing…", speaking: "Speaking…",
+    noAudio: "The online voice could not be played and this device has no voice for this language. The reply is shown on screen.",
     onlineVoice: "Use the online voice for Arabic and Yoruba (clearer, needs internet)", voiceCode: "Access code for the online voice", save: "Save",
     typePh: "Type a command…", send: "Send", empty: "Your conversation will appear here.",
     you: "You", bot: "Alexa",
@@ -523,6 +524,7 @@ const UI = {
     localOn: "وحدة التحكم المحلية متصلة", localOff: "تعذّر الوصول إلى وحدة التحكم",
     voiceTitle: "المساعد الصوتي", micLabel: "تحدث",
     ready: "اضغط على الميكروفون وتحدث", listening: "أستمع… تحدث الآن", processing: "جارٍ المعالجة…", speaking: "أتحدث…",
+    noAudio: "تعذّر تشغيل الصوت عبر الإنترنت ولا يوجد صوت لهذه اللغة على هذا الجهاز. الرد ظاهر على الشاشة.",
     onlineVoice: "استخدام الصوت عبر الإنترنت للعربية واليوروبا (أوضح، يحتاج إنترنت)", voiceCode: "رمز الدخول للصوت عبر الإنترنت", save: "حفظ",
     typePh: "اكتب أمراً…", send: "إرسال", empty: "ستظهر المحادثة هنا.",
     you: "أنت", bot: "أليكسا",
@@ -555,6 +557,7 @@ const UI = {
     localOn: "Ẹ̀rọ aláṣẹ ibẹ̀ wà lórí ayélujára", localOff: "Kò lè dé ẹ̀rọ aláṣẹ",
     voiceTitle: "Olùrànlọ́wọ́ ohùn", micLabel: "Sọ̀rọ̀",
     ready: "Tẹ makirofóònù kí ẹ sì sọ̀rọ̀", listening: "Ń gbọ́… ẹ sọ̀rọ̀ báyìí", processing: "Ń ṣiṣẹ́ lórí rẹ̀…", speaking: "Ń sọ̀rọ̀…",
+    noAudio: "A kò lè gbé ohùn orí ayélujára jáde, ẹ̀rọ yìí kò sì ní ohùn fún èdè yìí. Ìdáhùn wà lórí ìkànnì.",
     onlineVoice: "Lo ohùn orí ayélujára fún Lárúbáwá àti Yorùbá (ó yéni jù, ó nílò ayélujára)", voiceCode: "Kóòdù àyè fún ohùn orí ayélujára", save: "Fi pamọ́",
     typePh: "Kọ àṣẹ síbí…", send: "Fi ránṣẹ́", empty: "Ọ̀rọ̀ yín yóò hàn níbí.",
     you: "Ẹ̀yin", bot: "Alexa",
@@ -965,8 +968,11 @@ function speak(text) {
 
 function speakDevice(chunks, lang, my) {
   if (!TTS_OK) { setVoiceState("ready"); return; }
-  let voice = pickVoice(lang), usedFallback = false;
-  if (!voice && lang !== "en") { voice = fallbackEnglish(); usedFallback = true; }
+  const voice = pickVoice(lang);
+  if (!voice && lang !== "en") {            // never read Arabic/Yoruba with an English voice — it just spells the letters
+    setVoiceStatus(t("noAudio"), true);
+    return;
+  }
   const play = i => {
     if (my !== speakToken) return;
     if (i >= chunks.length) { setVoiceState("ready"); return; }
@@ -974,7 +980,6 @@ function speakDevice(chunks, lang, my) {
     u.rate = S.rate; u.pitch = S.pitch; u.volume = 1;
     if (voice) { u.voice = voice; u.lang = voice.lang || LANGS[lang].stt; }
     else u.lang = lang === "en" ? "en-US" : LANGS[lang].stt;
-    if (usedFallback) u.lang = voice ? voice.lang : "en-US";
     u.onend = () => setTimeout(() => play(i + 1), 160);          // small gap between sentences = clearer speech
     u.onerror = e => { if (my !== speakToken) return; if (e.error !== "interrupted" && e.error !== "canceled") setVoiceState("ready"); };
     keepAlive.push(u);                                           // stop the browser garbage-collecting the utterance
